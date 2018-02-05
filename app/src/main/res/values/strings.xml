@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">SignsCognizing</string>
+    <string name="开始交流">开始交流</string>
+    <string name="设置">设置</string>
+    <string name="关于">关于</string>
+    <string name="选择手环">选择手环</string>
+    <string name="返回">返回</string>
+    <string name="手语识别">手语识别</string>
+    <string name="语音输入">语音输入</string>
+</resources>
