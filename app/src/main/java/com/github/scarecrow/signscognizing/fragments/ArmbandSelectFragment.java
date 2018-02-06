@@ -9,9 +9,11 @@ import android.widget.Button;
 
 import com.github.scarecrow.signscognizing.MainActivity;
 import com.github.scarecrow.signscognizing.R;
+import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 
 /**
  * Created by Scarecrow on 2018/2/5.
+ *
  */
 
 public class ArmbandSelectFragment extends Fragment {
@@ -45,6 +47,10 @@ public class ArmbandSelectFragment extends Fragment {
                 parent_activity.fragmentSwitch(MainActivity.FRAGMENT_START_CONTROL);
             }
         });
+
+        ArmbandManager.getArmbandsManger().getArmbandsList();
+
+
     }
 
 }
