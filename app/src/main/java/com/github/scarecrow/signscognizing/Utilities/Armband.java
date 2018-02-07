@@ -51,9 +51,14 @@ public class Armband {
 
     @Override
     public String toString() {
-        String str = super.toString();
-        str += "\narmband_id: " + armband_id
-                + "\narmband_status: " + armband_status;
+        String str, armband_status_str;
+        if (armband_status == ARMBAND_OCCURPIED)
+            armband_status_str = "armband occupied";
+        else
+            armband_status_str = "armband ready to connect";
+
+        str = "armband_id:\n   " + armband_id
+                + "\narmband_status:\n   " + armband_status_str;
         return str;
     }
 }

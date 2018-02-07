@@ -7,7 +7,7 @@
         </shape>
     </item>
     <!-- 给View的 左 设置5dp的边框 -->
-    <item android:bottom="5dp">
+    <item android:bottom="2dp">
         <shape>
             <!--     View填充颜色 -->
             <solid android:color="#FFFFFF" />

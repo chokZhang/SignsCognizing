@@ -1,15 +1,16 @@
-package com.github.scarecrow.signscognizing;
+package com.github.scarecrow.signscognizing.activities;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.fragments.ArmbandSelectFragment;
 import com.github.scarecrow.signscognizing.fragments.ConversationDisplayFragment;
 import com.github.scarecrow.signscognizing.fragments.InfoDisplayFragment;
 import com.github.scarecrow.signscognizing.fragments.InputControlPanelFragment;
-import com.github.scarecrow.signscognizing.fragments.StartControlFragment;
+import com.github.scarecrow.signscognizing.fragments.StartControlPanelFragment;
 
 public class MainActivity extends AppCompatActivity {
     // 各个fragment的代号 在切换fragment的时候可以由外部调用。
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new InputControlPanelFragment();
                 break;
             case FRAGMENT_START_CONTROL:
-                fragment = new StartControlFragment();
+                fragment = new StartControlPanelFragment();
                 break;
             default:
                 fragment = new InfoDisplayFragment();

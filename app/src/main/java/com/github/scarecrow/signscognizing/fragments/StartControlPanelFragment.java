@@ -1,15 +1,13 @@
 package com.github.scarecrow.signscognizing.fragments;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.github.scarecrow.signscognizing.MainActivity;
+import com.github.scarecrow.signscognizing.activities.MainActivity;
 import com.github.scarecrow.signscognizing.R;
 
 /**
@@ -17,7 +15,7 @@ import com.github.scarecrow.signscognizing.R;
  *
  */
 
-public class StartControlFragment extends Fragment {
+public class StartControlPanelFragment extends Fragment {
 
     // 保存一个parent activity ，在需要操作parent上的组件时可以通过activity处理
     // activity 上的view组件也可以通过其进行访问

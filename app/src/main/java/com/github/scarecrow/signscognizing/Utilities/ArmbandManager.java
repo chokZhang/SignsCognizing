@@ -24,7 +24,7 @@ import static android.content.ContentValues.TAG;
 
 public class ArmbandManager {
 
-    public static String SERVER_IP_ADDRESS = "http://192.168.0.104:8000/app";
+    public static String SERVER_IP_ADDRESS = "http://192.168.0.102:8000/app";
 
     private ArmbandManager() {
     }
