@@ -21,8 +21,6 @@ public class StartControlPanelFragment extends Fragment {
     // activity 上的view组件也可以通过其进行访问
 
 
-    private View fragment_view;
-
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -39,13 +37,14 @@ public class StartControlPanelFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
+        View fragment_view = getView();
         final MainActivity parent_activity = (MainActivity) getActivity();
-        fragment_view = getView();
-        Button bt = (Button) fragment_view.findViewById(R.id.button_start_conversation);
+
+        Button bt = fragment_view.findViewById(R.id.button_start_conversation);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                parent_activity.fragmentSwitch(MainActivity.FRAGMENT_ARMBANDS_SELECT);
+                parent_activity.switchFragment(MainActivity.FRAGMENT_ARMBANDS_SELECT);
             }
         });
 

@@ -7,7 +7,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import okhttp3.Call;
@@ -20,11 +19,12 @@ import static android.content.ContentValues.TAG;
 
 /**
  * Created by Scarecrow on 2018/2/6.
+ *
  */
 
 public class ArmbandManager {
 
-    public static String SERVER_IP_ADDRESS = "http://192.168.0.102:8000/app";
+    static String SERVER_IP_ADDRESS = "http://192.168.0.102:8000/app";
 
     private ArmbandManager() {
     }
@@ -32,6 +32,9 @@ public class ArmbandManager {
     private static ArmbandManager instance = new ArmbandManager();
 
     private List<Armband> armband_list = new ArrayList<>();
+
+    private Armband current_connected_armband;
+
 
     public static ArmbandManager getArmbandsManger() {
         return instance;
@@ -78,5 +81,10 @@ public class ArmbandManager {
             Log.e(TAG, "getArmbandsList: cannot parse armbands list json " + ee);
             ee.printStackTrace();
         }
+    }
+
+
+    public void setCurrentConnectedArmband(Armband armband) {
+        current_connected_armband = armband;
     }
 }

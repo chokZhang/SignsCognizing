@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.Armband;
+import com.github.scarecrow.signscognizing.fragments.ArmbandSelectFragment;
 
 import java.util.List;
 
@@ -20,11 +21,14 @@ import static android.content.ContentValues.TAG;
 
 /**
  * Created by Scarecrow on 2018/2/7.
+ *
  */
 
 public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<ArmbandListRecyclerViewAdapter.ArmbandListItemViewHolder> {
 
     private List<Armband> armband_list;
+
+    private ArmbandSelectFragment.ListItemClickListenner listItemClickListenner;
 
     static class ArmbandListItemViewHolder extends RecyclerView.ViewHolder {
         public LinearLayout item_body;
@@ -41,6 +45,11 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
         this.armband_list = armband_list;
     }
 
+    public void setOnListItemClickListenner(
+            ArmbandSelectFragment.ListItemClickListenner listenner) {
+        listItemClickListenner = listenner;
+    }
+
     @Override
     public ArmbandListItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
@@ -54,11 +63,13 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
         holder.info_display.setText(armband.toString());
         if (armband.getArmband_status() == Armband.ARMBAND_OCCURPIED) {
             holder.info_display.setBackgroundColor(Color.LTGRAY);
+            return;
         }
         holder.item_body.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: armband item" + armband);
+                listItemClickListenner.onListItemClick(armband);
             }
         });
     }

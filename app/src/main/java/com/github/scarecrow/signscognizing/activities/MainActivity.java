@@ -27,8 +27,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fragmentSwitch(FRAGMENT_START_CONTROL);
-        fragmentSwitch(FRAGMENT_INFO_DISPLAY);
+        switchFragment(FRAGMENT_START_CONTROL);
+        switchFragment(FRAGMENT_INFO_DISPLAY);
 
     }
 
@@ -39,8 +39,7 @@ public class MainActivity extends AppCompatActivity {
      * 每个fragment都是在指定的位置 所以只需要指定目标fragment就ok
      * @param fragment_code 目标fragment的code
      */
-    public void fragmentSwitch(int fragment_code){
-
+    public void switchFragment(int fragment_code) {
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment;
         int target_container;

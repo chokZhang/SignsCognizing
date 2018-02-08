@@ -1,5 +1,6 @@
 package com.github.scarecrow.signscognizing.fragments;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,14 +9,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.github.scarecrow.signscognizing.Utilities.Armband;
+import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
 import com.github.scarecrow.signscognizing.activities.MainActivity;
 import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.adapters.ArmbandListRecyclerViewAdapter;
-
-import java.util.List;
 
 /**
  * Created by Scarecrow on 2018/2/5.
@@ -45,22 +46,70 @@ public class ArmbandSelectFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
+
         Button bt = fragment_view.findViewById(R.id.button_armband_select_return);
         final MainActivity parent_activity = (MainActivity)getActivity();
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                parent_activity.fragmentSwitch(MainActivity.FRAGMENT_START_CONTROL);
+                parent_activity.switchFragment(MainActivity.FRAGMENT_START_CONTROL);
             }
         });
 
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        RecyclerView armbands_rv = (RecyclerView) fragment_view.findViewById(R.id.armbands_list_rv);
+        final RecyclerView armbands_rv = fragment_view.findViewById(R.id.armbands_list_rv);
         armbands_rv.setLayoutManager(linearLayoutManager);
-        ArmbandListRecyclerViewAdapter adapter = new ArmbandListRecyclerViewAdapter(
+        final ArmbandListRecyclerViewAdapter adapter = new ArmbandListRecyclerViewAdapter(
                 ArmbandManager.getArmbandsManger().getArmbandsList());
+        adapter.setOnListItemClickListenner(new ListItemClickListenner() {
+            @Override
+            public void onListItemClick(Armband item) {
+                final ProgressDialog progressDialog = new ProgressDialog(getContext());
+                progressDialog.setCancelable(true);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setTitle("连接中");
+                progressDialog.show();
+
+                SocketConnectionManager.getInstance()
+                        .startConnection(item, new SocketConnectionManager.TaskCallbackListenner() {
+                            @Override
+                            public void onConnectSuccess() {
+                                progressDialog.cancel();
+
+                                Toast.makeText(getContext(), " 连接成功", Toast.LENGTH_SHORT)
+                                        .show();
+
+                                ((MainActivity) getActivity())
+                                        .switchFragment(MainActivity.FRAGMENT_INPUT_CONTROL);
+                                ((MainActivity) getActivity())
+                                        .switchFragment(MainActivity.FRAGMENT_CONVERSATION_DISPLAY);
+                            }
+
+                            @Override
+                            public void onConnectFailed() {
+                                progressDialog.cancel();
+                                Toast.makeText(getContext(), " 连接失败", Toast.LENGTH_SHORT)
+                                        .show();
+                            }
+                        });
+            }
+        });
         armbands_rv.setAdapter(adapter);
 
+        bt = fragment_view.findViewById(R.id.button_armband_select_refresh);
+        bt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                armbands_rv.getAdapter().notifyDataSetChanged();
+            }
+        });
+
+
+    }
+
+    public interface ListItemClickListenner {
+        void onListItemClick(Armband item);
     }
 
 }

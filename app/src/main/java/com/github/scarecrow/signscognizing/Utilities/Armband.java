@@ -12,7 +12,7 @@ import static android.content.ContentValues.TAG;
  */
 
 public class Armband {
-    public static int ARMBAND_READY = -1,
+    public static final int ARMBAND_READY = -1,
             ARMBAND_OCCURPIED = -2;
 
 

@@ -10,6 +10,7 @@ import com.github.scarecrow.signscognizing.R;
 
 /**
  * Created by Scarecrow on 2018/2/5.
+ *
  */
 
 public class InfoDisplayFragment extends Fragment {
@@ -22,9 +23,8 @@ public class InfoDisplayFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
-        View view = inflater.inflate(R.layout.fragment_info_display, container,
+        return inflater.inflate(R.layout.fragment_info_display, container,
                 false);
-        return view;
     }
 
 
