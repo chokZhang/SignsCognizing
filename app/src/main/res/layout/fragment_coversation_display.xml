@@ -8,9 +8,11 @@
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:id="@+id/communicate_infos_display_rv"
+        android:id="@+id/conversation_display_rv"
         android:layout_weight="1"
-        android:background="@drawable/border_bottom_bg_img"></android.support.v7.widget.RecyclerView>
+        android:background="@drawable/border_bottom_bg_img">
+
+    </android.support.v7.widget.RecyclerView>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,7 +23,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:id="@+id/communicate_text_input"
+            android:id="@+id/conversation_text_input"
             android:textSize="25sp"
             android:hint="@string/text_edit_hint" />
 

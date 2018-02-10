@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="10dp">
-    <!-- recive bubble-->
+    <!-- receive bubble-->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,22 +23,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#000000"
-                android:id="@+id/text_view_text_receive"
-                android:textSize="20sp" />
+                android:id="@+id/msg_content_receive"
+                android:textSize="30sp" />
         </LinearLayout>
         <!-- sign confirm -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:id="@+id/sign_confirm_dialog"
-            android:visibility="gone">
+            android:visibility="gone"
+            android:id="@+id/sign_confirm_dialog">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/hint_sign_confirm"
-                android:textSize="15sp" />
+                android:textSize="20sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -48,8 +48,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"
+                    android:textSize="20sp"
                     android:text="@string/是"
+                    android:textColor="@color/colorPrimary"
                     android:padding="10dp"
                     android:layout_marginRight="30dp"
                     android:layout_marginEnd="30dp"
@@ -58,7 +59,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorPrimary"
                     android:padding="10dp"
                     android:text="@string/否"
                     android:id="@+id/button_sign_confirm_no" />
@@ -75,8 +77,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/hint_sign_confirm"
-                android:textSize="15sp" />
+                android:text="@string/hint_sign_recapture"
+                android:textSize="20sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -86,8 +88,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"
+                    android:textSize="20sp"
                     android:text="@string/是"
+                    android:textColor="@color/colorPrimary"
                     android:padding="10dp"
                     android:layout_marginRight="30sp"
                     android:layout_marginEnd="30dp"
@@ -96,7 +99,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="15sp"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorPrimary"
                     android:padding="10dp"
                     android:text="@string/否"
                     android:id="@+id/button_sign_recapture_no" />
@@ -126,9 +130,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#000000"
-                android:id="@+id/text_view_text_send"
-                android:textSize="20sp" />
+                android:id="@+id/msg_content_send"
+                android:textSize="30sp" />
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_view_msg_type_display" />
 
     </LinearLayout>
 

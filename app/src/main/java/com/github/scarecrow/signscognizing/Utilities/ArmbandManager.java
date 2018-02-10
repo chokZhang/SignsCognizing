@@ -87,4 +87,8 @@ public class ArmbandManager {
     public void setCurrentConnectedArmband(Armband armband) {
         current_connected_armband = armband;
     }
+
+    public Armband getCurrentConnectedArmband() {
+        return current_connected_armband;
+    }
 }
