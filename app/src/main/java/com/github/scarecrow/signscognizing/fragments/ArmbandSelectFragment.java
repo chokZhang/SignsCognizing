@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import com.github.scarecrow.signscognizing.activities.MainActivity;
 import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.adapters.ArmbandListRecyclerViewAdapter;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by Scarecrow on 2018/2/5.
@@ -72,11 +75,10 @@ public class ArmbandSelectFragment extends Fragment {
                 progressDialog.show();
 
                 SocketConnectionManager.getInstance()
-                        .startConnection(item, new SocketConnectionManager.TaskCallbackListenner() {
+                        .startConnection(item, new SocketConnectionManager.TaskCompleteCallback() {
                             @Override
-                            public void onConnectSuccess() {
+                            public void onConnectSucceeded() {
                                 progressDialog.cancel();
-
                                 Toast.makeText(getContext(), " 连接成功", Toast.LENGTH_SHORT)
                                         .show();
 
@@ -84,13 +86,22 @@ public class ArmbandSelectFragment extends Fragment {
                                         .switchFragment(MainActivity.FRAGMENT_INPUT_CONTROL);
                                 ((MainActivity) getActivity())
                                         .switchFragment(MainActivity.FRAGMENT_CONVERSATION_DISPLAY);
+                                SocketConnectionManager.getInstance()
+                                        .sendMessage("hi there, server");
                             }
-
                             @Override
                             public void onConnectFailed() {
                                 progressDialog.cancel();
                                 Toast.makeText(getContext(), " 连接失败", Toast.LENGTH_SHORT)
                                         .show();
+                            }
+
+                            @Override
+                            public void onReceivedMessage(String message) {
+                                Log.d(TAG, "onReceiveMessage: receive message from server: "
+                                        + message);
+                                SocketConnectionManager.getInstance()
+                                        .sendMessage("end");
                             }
                         });
             }
@@ -101,6 +112,7 @@ public class ArmbandSelectFragment extends Fragment {
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ArmbandManager.getArmbandsManger().updateArmbandsList();
                 armbands_rv.getAdapter().notifyDataSetChanged();
             }
         });

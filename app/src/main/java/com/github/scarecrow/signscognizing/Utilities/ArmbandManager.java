@@ -27,6 +27,7 @@ public class ArmbandManager {
     static String SERVER_IP_ADDRESS = "http://192.168.0.102:8000/app";
 
     private ArmbandManager() {
+        updateArmbandsList();
     }
 
     private static ArmbandManager instance = new ArmbandManager();
@@ -40,13 +41,13 @@ public class ArmbandManager {
         return instance;
     }
 
-    public List<Armband> getArmbandsList() {
+    public void updateArmbandsList() {
 
         OkHttpClient okHttpClient = new OkHttpClient();
 
         Request request = new Request.Builder()
                 .get()
-                .url(SERVER_IP_ADDRESS + "/get_armbands_list")
+                .url(SERVER_IP_ADDRESS + "/get_armbands_list/")
                 .build();
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -60,16 +61,19 @@ public class ArmbandManager {
                     String res = response.body().string();
                     // okhttp 中的response.body().string() 只能调用一次
                     Log.d(TAG, "onResponse: get armbandsss : " + res);
-                    updateArmbandsList(res);
+                    parseArmbandsListJSON(res);
                 }
             }
         });
+    }
 
+    public List<Armband> getArmbandsList() {
+        updateArmbandsList();
         return armband_list;
     }
 
 
-    private void updateArmbandsList(String armband_list_JSON) {
+    private void parseArmbandsListJSON(String armband_list_JSON) {
         armband_list.clear();
         try {
             JSONArray armbands_json_list = new JSONArray(armband_list_JSON);
