@@ -6,8 +6,10 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.Socket;
@@ -69,6 +71,7 @@ public class SocketCommunicatorThread extends HandlerThread {
             Log.e(TAG, "disconnect: error: " + ee);
             ee.printStackTrace();
         }
+        quit();
     }
 
     @Override
@@ -135,7 +138,7 @@ public class SocketCommunicatorThread extends HandlerThread {
             listener_thread.start();
 
         } catch (Exception ee) {
-            main_thread_handler.obtainMessage(SocketConnectionManager.CONNECT_FALIED)
+            main_thread_handler.obtainMessage(SocketConnectionManager.CONNECT_FAILED)
                     .sendToTarget();
             Log.e(TAG, "handleMessage: onEstablish connection : " + ee);
             ee.printStackTrace();
@@ -177,20 +180,27 @@ public class SocketCommunicatorThread extends HandlerThread {
 
         @Override
         public void run() {
-            Scanner scanner = new Scanner(inputStream);
-            while (!Thread.currentThread().isInterrupted()) {
-                if (scanner.hasNext()) {
-                    StringBuilder buffer = new StringBuilder();
-                    while (scanner.hasNext()) {
-                        buffer.append(scanner.nextLine());
-                    }
-                    String text = buffer.toString();
-                    callback_thread.obtainMessage(SocketConnectionManager.RECEIVE_MESSAGE, text)
-                            .sendToTarget();
-                }
-            }
             try {
-                inputStream.close();
+                byte[] buffer = new byte[1];
+                while (!Thread.currentThread().isInterrupted()) {
+                    inputStream.read(buffer);
+                    if (buffer[0] != '\0') {
+                        System.out.println("socket stream: " + new String(buffer));
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append(new String(buffer));
+                        inputStream.read(buffer);
+                        //如果没有到达结尾
+                        while ((buffer[0] != '$')) {
+                            stringBuilder.append(new String(buffer));
+                            System.out.println(new String(buffer));
+                            inputStream.read(buffer);
+                        }
+                        main_thread_handler
+                                .obtainMessage(SocketConnectionManager.RECEIVE_MESSAGE,
+                                        stringBuilder.toString())
+                                .sendToTarget();
+                    }
+                }
             } catch (Exception ee) {
                 Log.e(TAG, "run: in receive text " + ee);
             }

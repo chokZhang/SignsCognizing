@@ -6,6 +6,8 @@ import android.os.Message;
 import android.os.Handler;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.LogRecord;
 
 import static android.content.ContentValues.TAG;
@@ -29,7 +31,8 @@ public class SocketConnectionManager {
     // 从而进行下一步的工作
     public static final int LOOPER_READY = 57,
             CONNECT_SUCCESS = 56,
-            CONNECT_FALIED = 514,
+            CONNECT_FAILED = 514,
+            DISCONNECT = 46,
             RECEIVE_MESSAGE = 75;
 
 
@@ -43,6 +46,69 @@ public class SocketConnectionManager {
 
     private int manager_status = DISCONNECTED;
 
+    private List<TaskCompleteCallback> listener_list;
+
+    public static SocketConnectionManager getInstance() {
+        return instance;
+    }
+
+    public void startConnection(Armband target_armband,
+                                TaskCompleteCallback callbackListener) {
+        // 这里调连接线程 进行socket连接
+        Log.d(TAG, "startConnection: 连接手环： " + target_armband + "中。。");
+        socket_communicator = new SocketCommunicatorThread(main_thread_handler);
+        socket_communicator.start();
+        socket_communicator.getLooper();
+        listener_list = new ArrayList<>();
+        listener_list.add(callbackListener);
+        ArmbandManager.getArmbandsManger()
+                .setCurrentConnectedArmband(target_armband);
+        //当communicator的looper准备完毕后 会通过handler发消息的方式进行连接请求
+    }
+
+    public void sendMessage(String message) {
+        socket_communicator.sendMessage(message);
+    }
+
+    public void disconnect() {
+        manager_status = DISCONNECTED;
+        ArmbandManager.getArmbandsManger()
+                .setCurrentConnectedArmband(null);
+        noticeListeners(DISCONNECT, null);
+        listener_list.clear();
+        socket_communicator.disconnect();
+
+    }
+
+    public void addTaskCallback(TaskCompleteCallback callback) {
+        listener_list.add(callback);
+    }
+
+
+    private void noticeListeners(int type, String data) {
+        switch (type) {
+            case CONNECT_SUCCESS:
+                for (TaskCompleteCallback callback : listener_list)
+                    callback.onConnectSucceeded();
+                break;
+            case CONNECT_FAILED:
+                for (TaskCompleteCallback callback : listener_list)
+                    callback.onConnectFailed();
+                break;
+            case RECEIVE_MESSAGE:
+                for (TaskCompleteCallback callback : listener_list)
+                    callback.onReceivedMessage(data);
+                break;
+            case DISCONNECT:
+                for (TaskCompleteCallback callback : listener_list)
+                    callback.onDisconnect();
+
+            default:
+                break;
+
+        }
+    }
+
     // 负责从连接线程接受消息然后通过回调与外界进行互动的handler
     // 该处在主线程
     @SuppressLint("HandlerLeak")
@@ -50,22 +116,22 @@ public class SocketConnectionManager {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case CONNECT_FALIED:
+                case CONNECT_FAILED:
                     ArmbandManager.getArmbandsManger()
                             .setCurrentConnectedArmband(null);
                     manager_status = DISCONNECTED;
-                    taskCallbackListener.onConnectFailed();
+                    noticeListeners(CONNECT_FAILED, null);
                     break;
 
                 case CONNECT_SUCCESS:
                     manager_status = CONNECTED;
-                    taskCallbackListener.onConnectSucceeded();
+                    noticeListeners(CONNECT_SUCCESS, null);
                     break;
 
                 case RECEIVE_MESSAGE:
                     String info = (String) msg.obj;
                     Log.d(TAG, "handleMessage: receive message : " + info);
-                    taskCallbackListener.onReceivedMessage(info);
+                    //noticeListeners(RECEIVE_MESSAGE,info);
                     break;
 
                 case LOOPER_READY:
@@ -81,42 +147,13 @@ public class SocketConnectionManager {
         }
     };
 
-    private TaskCompleteCallback taskCallbackListener;
-
-    public static SocketConnectionManager getInstance() {
-        return instance;
-    }
-
-    public void startConnection(Armband target_armband,
-                                TaskCompleteCallback callbackListener) {
-        // 这里调连接线程 进行socket连接
-        Log.d(TAG, "startConnection: 连接手环： " + target_armband + "中。。");
-        socket_communicator = new SocketCommunicatorThread(main_thread_handler);
-        socket_communicator.start();
-        socket_communicator.getLooper();
-        taskCallbackListener = callbackListener;
-        ArmbandManager.getArmbandsManger()
-                .setCurrentConnectedArmband(target_armband);
-        //当communicator的looper准备完毕后 会通过handler发消息的方式进行连接请求
-    }
-
-    public void sendMessage(String message) {
-        socket_communicator.sendMessage(message);
-    }
-
-    public void disconnected() {
-        manager_status = DISCONNECTED;
-        ArmbandManager.getArmbandsManger()
-                .setCurrentConnectedArmband(null);
-
-    }
-
-
     public interface TaskCompleteCallback {
         void onConnectSucceeded();
 
         void onConnectFailed();
 
         void onReceivedMessage(String message);
+
+        void onDisconnect();
     }
 }

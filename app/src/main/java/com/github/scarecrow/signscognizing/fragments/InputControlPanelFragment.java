@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.github.scarecrow.signscognizing.R;
+import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.Utilities.MessageManager;
 import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
 import com.github.scarecrow.signscognizing.activities.MainActivity;
@@ -47,7 +48,7 @@ public class InputControlPanelFragment extends Fragment {
                 activity.switchFragment(MainActivity.FRAGMENT_ARMBANDS_SELECT);
                 activity.switchFragment(MainActivity.FRAGMENT_INFO_DISPLAY);
                 SocketConnectionManager.getInstance()
-                        .disconnected();
+                        .disconnect();
             }
         });
 
@@ -56,9 +57,8 @@ public class InputControlPanelFragment extends Fragment {
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MessageManager.getInstance()
-                        .buildSignMessage("这是手语", "hhhhh", 5646);
-                //todo 这里发起手语采集
+                SocketConnectionManager.getInstance()
+                        .sendMessage(buildSignRecognizeRequest());
             }
         });
 
@@ -72,5 +72,14 @@ public class InputControlPanelFragment extends Fragment {
                 //todo 这里发起语音识别
             }
         });
+    }
+
+    private String buildSignRecognizeRequest() {
+        String request = "{ " +
+                "\"control\": \"sign_cognize_request\" ," +
+                "\"data\": \"" + ArmbandManager.getArmbandsManger()
+                .getCurrentConnectedArmband()
+                .getArmband_id() + "\" }";
+        return request;
     }
 }

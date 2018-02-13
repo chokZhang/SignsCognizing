@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.github.scarecrow.signscognizing.Utilities.Armband;
+import com.github.scarecrow.signscognizing.Utilities.MessageManager;
 import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
 import com.github.scarecrow.signscognizing.activities.MainActivity;
 import com.github.scarecrow.signscognizing.R;
@@ -65,6 +66,7 @@ public class ArmbandSelectFragment extends Fragment {
         armbands_rv.setLayoutManager(linearLayoutManager);
         final ArmbandListRecyclerViewAdapter adapter = new ArmbandListRecyclerViewAdapter(
                 ArmbandManager.getArmbandsManger().getArmbandsList());
+
         adapter.setOnListItemClickListenner(new ListItemClickListenner() {
             @Override
             public void onListItemClick(Armband item) {
@@ -86,8 +88,8 @@ public class ArmbandSelectFragment extends Fragment {
                                         .switchFragment(MainActivity.FRAGMENT_INPUT_CONTROL);
                                 ((MainActivity) getActivity())
                                         .switchFragment(MainActivity.FRAGMENT_CONVERSATION_DISPLAY);
-                                SocketConnectionManager.getInstance()
-                                        .sendMessage("hi there, server");
+                                //   SocketConnectionManager.getInstance()
+                                //          .sendMessage("hi there, server");
                             }
                             @Override
                             public void onConnectFailed() {
@@ -100,8 +102,13 @@ public class ArmbandSelectFragment extends Fragment {
                             public void onReceivedMessage(String message) {
                                 Log.d(TAG, "onReceiveMessage: receive message from server: "
                                         + message);
-                                SocketConnectionManager.getInstance()
-                                        .sendMessage("end");
+                                MessageManager.getInstance()
+                                        .updateSignMessage(message);
+                            }
+
+                            @Override
+                            public void onDisconnect() {
+
                             }
                         });
             }
@@ -112,12 +119,10 @@ public class ArmbandSelectFragment extends Fragment {
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArmbandManager.getArmbandsManger().updateArmbandsList();
+                //     ArmbandManager.getArmbandsManger().updateArmbandsList();
                 armbands_rv.getAdapter().notifyDataSetChanged();
             }
         });
-
-
     }
 
     public interface ListItemClickListenner {
