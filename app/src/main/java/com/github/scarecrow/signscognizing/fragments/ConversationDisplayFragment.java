@@ -46,12 +46,14 @@ public class ConversationDisplayFragment extends Fragment {
         MessageManager.getInstance().addNewNoticeTarget(new MessageManager.NoticeMessageChanged() {
             @Override
             public void onNewMessageAdd() {
+                adapter.updateMessageList();
                 adapter.notifyDataSetChanged();
                 recyclerView.scrollToPosition(adapter.getItemCount() - 1);
             }
 
             @Override
             public void onMessageContentChange() {
+                adapter.updateMessageList();
                 adapter.notifyDataSetChanged();
             }
         });

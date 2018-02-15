@@ -131,7 +131,7 @@ public class SocketConnectionManager {
                 case RECEIVE_MESSAGE:
                     String info = (String) msg.obj;
                     Log.d(TAG, "handleMessage: receive message : " + info);
-                    //noticeListeners(RECEIVE_MESSAGE,info);
+                    noticeListeners(RECEIVE_MESSAGE, info);
                     break;
 
                 case LOOPER_READY:

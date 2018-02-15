@@ -23,6 +23,7 @@ public class SignMessage extends ConversationMessage {
         sign_feedback_stauts = stauts;
     }
 
+
     public int getSignFeedbackStatus() {
         return sign_feedback_stauts;
     }

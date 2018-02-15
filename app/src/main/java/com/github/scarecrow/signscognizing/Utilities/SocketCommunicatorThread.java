@@ -6,6 +6,8 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,6 +63,17 @@ public class SocketCommunicatorThread extends HandlerThread {
     }
 
     public void disconnect() {
+        JSONObject request_body = new JSONObject();
+        try {
+            request_body.accumulate("control", "end_connection");
+            request_body.accumulate("data", "");
+        } catch (Exception ee) {
+            Log.e(TAG, "disconnect: on build excption" + ee);
+            ee.printStackTrace();
+        }
+        communicator_handler
+                .obtainMessage(SocketConnectionManager.TASK_SEND_INFO, request_body.toString())
+                .sendToTarget();
         listener_thread.interrupt();
         try {
             client_sock.getOutputStream().close();
@@ -195,7 +208,7 @@ public class SocketCommunicatorThread extends HandlerThread {
                             System.out.println(new String(buffer));
                             inputStream.read(buffer);
                         }
-                        main_thread_handler
+                        callback_thread
                                 .obtainMessage(SocketConnectionManager.RECEIVE_MESSAGE,
                                         stringBuilder.toString())
                                 .sendToTarget();

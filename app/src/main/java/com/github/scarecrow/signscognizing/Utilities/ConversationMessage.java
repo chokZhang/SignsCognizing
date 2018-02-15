@@ -34,4 +34,8 @@ public abstract class ConversationMessage {
     protected void setTextContent(String content) {
         text_content = content;
     }
+
+    public void setMsgId(int id) {
+        msg_id = id;
+    }
 }

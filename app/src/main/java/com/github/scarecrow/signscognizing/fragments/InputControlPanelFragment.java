@@ -3,6 +3,7 @@ package com.github.scarecrow.signscognizing.fragments;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,10 @@ import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.Utilities.MessageManager;
 import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
 import com.github.scarecrow.signscognizing.activities.MainActivity;
+
+import org.json.JSONObject;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by Scarecrow on 2018/2/
@@ -59,6 +64,8 @@ public class InputControlPanelFragment extends Fragment {
             public void onClick(View v) {
                 SocketConnectionManager.getInstance()
                         .sendMessage(buildSignRecognizeRequest());
+                MessageManager.getInstance()
+                        .buildSignMessage();
             }
         });
 
@@ -74,12 +81,31 @@ public class InputControlPanelFragment extends Fragment {
         });
     }
 
+    /**
+     * 此处为新增手语识别
+     *
+     * @return 请求的json
+     */
     private String buildSignRecognizeRequest() {
-        String request = "{ " +
-                "\"control\": \"sign_cognize_request\" ," +
-                "\"data\": \"" + ArmbandManager.getArmbandsManger()
+        String armband_id = ArmbandManager.getArmbandsManger()
                 .getCurrentConnectedArmband()
-                .getArmband_id() + "\" }";
-        return request;
+                .getArmband_id();
+        JSONObject request_body = new JSONObject();
+        try {
+            request_body.accumulate("control", "sign_cognize_request");
+            JSONObject data = new JSONObject();
+            data.accumulate("armband_id", armband_id);
+            data.accumulate("request_id", 0);
+            request_body.accumulate("data", data);
+        } catch (Exception ee) {
+            Log.e(TAG, "buildSignRecognizeRequest: on build request json " + ee);
+            ee.printStackTrace();
+        }
+        return request_body.toString();
     }
+    /*
+        todo :
+        "data": {"sign_id" :0} sign_id字段使用0 标识
+     */
+
 }
