@@ -1,7 +1,10 @@
 package com.github.scarecrow.signscognizing.adapters;
 
 import android.graphics.Color;
-import android.support.v7.widget.MenuItemHoverListener;
+
+import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
+import com.github.scarecrow.signscognizing.fragments.InputControlPanelFragment;
+import com.iflytek.cloud.SpeechRecognizer;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +20,7 @@ import com.github.scarecrow.signscognizing.Utilities.SignMessage;
 import com.github.scarecrow.signscognizing.Utilities.TextMessage;
 import com.github.scarecrow.signscognizing.Utilities.VoiceMessage;
 
+import java.io.InputStreamReader;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
@@ -80,70 +84,13 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
     public void onBindViewHolder(final MessagesItemViewHolder holder, int position) {
         ConversationMessage message = messages_list.get(position);
         initializeHolderView(holder);
-        // todo 重用问题基本解决 但是不够细致 之前的状态没有被完全保存
-        // 每个手语是否已经重发了要保存一个状态 保存于数据中
+        // 每个手语是否已经重发保存一个状态 保存于数据中
         // view是重用的 每次都要先初始化  然后跟着数据的情况改变
         switch (message.getMsgType()) {
             case ConversationMessage.SIGN:
                 final SignMessage signMessage = (SignMessage) message;
                 //如果这条手势消息没有被确认 则保持可被确认的初始状态 随时被请求重新采集
-                if (signMessage.getSignFeedbackStatus() == SignMessage.INITIAL) {
-                    holder.receive_msg_view.setVisibility(View.VISIBLE);
-                    holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
-                    holder.receive_msg_content.setText(signMessage.getTextContent());
-                    holder.sign_confirm_yes_button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            holder.sign_confirm_yes_button.setTextColor(Color.GRAY);
-                            signMessage.setSignFeedbackStauts(SignMessage.HAD_CONFIRMED);
-                            //点了yes之后要把no失效掉
-                            holder.sign_confirm_no_button
-                                    .setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                        }
-                                    });
-                        }
-                    });
-
-                    holder.sign_confirm_no_button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            holder.sign_confirm_no_button.setTextColor(Color.GRAY);
-                            holder.sign_recapture_dialog.setVisibility(View.VISIBLE);
-
-                        }
-                    });
-
-                    holder.sign_recapture_yes_button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Log.d(TAG, "onClick: 手语re采集 回调");
-                            // todo 这里进行回调
-                            holder.sign_recapture_yes_button.setTextColor(Color.GRAY);
-                            // 由于手语采集需要ui 还是得从fragment传入回调
-
-                        }
-                    });
-
-                    holder.sign_recapture_no_button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            holder.sign_recapture_no_button.setTextColor(Color.GRAY);
-                        }
-                    });
-                } else {
-                    //如果被确认过 则保持被确认后的状态
-                    holder.receive_msg_view.setVisibility(View.VISIBLE);
-                    holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
-                    holder.sign_confirm_yes_button.setTextColor(Color.GRAY);
-                    holder.sign_confirm_no_button
-                            .setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                }
-                            });
-                }
+                setHolderViewByMsgState(holder, signMessage);
                 break;
 
             case ConversationMessage.TEXT:
@@ -172,12 +119,99 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
         holder.receive_msg_view.setVisibility(View.GONE);
         holder.sign_recapture_dialog.setVisibility(View.GONE);
         int init_blue_color_value = 0xFF3F51B5;
-        holder.sign_confirm_yes_button.setTextColor(0xFF3F51B5);
+        holder.sign_confirm_yes_button.setTextColor(init_blue_color_value);
         holder.sign_confirm_no_button.setTextColor(init_blue_color_value);
         holder.sign_recapture_yes_button.setTextColor(init_blue_color_value);
         holder.sign_recapture_no_button.setTextColor(init_blue_color_value);
+        View.OnClickListener empty = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            }
+        };
+        holder.sign_recapture_no_button.setOnClickListener(empty);
+        holder.sign_recapture_yes_button.setOnClickListener(empty);
+        holder.sign_confirm_no_button.setOnClickListener(empty);
+        holder.sign_confirm_yes_button.setOnClickListener(empty);
+
     }
 
+    private void setHolderViewByMsgState(final MessagesItemViewHolder holder,
+                                         final SignMessage message) {
+        initializeHolderView(holder);
+        switch (message.getSignFeedbackStatus()) {
+            case SignMessage.INITIAL:
+                holder.receive_msg_view.setVisibility(View.VISIBLE);
+                holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
+                holder.receive_msg_content.setText(message.getTextContent());
+                holder.sign_confirm_yes_button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        holder.sign_confirm_yes_button.setTextColor(Color.GRAY);
+                        message.setSignFeedbackStatus(SignMessage.CONFIRMED_CORRECT);
+                        setHolderViewByMsgState(holder, message);
+                    }
+                });
+
+                holder.sign_confirm_no_button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        message.setSignFeedbackStatus(SignMessage.CONFIRMED_WRONG);
+                        setHolderViewByMsgState(holder, message);
+
+                    }
+                });
+                break;
+            case SignMessage.CONFIRMED_CORRECT:
+                holder.receive_msg_view.setVisibility(View.VISIBLE);
+                holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
+                holder.receive_msg_content.setText(message.getTextContent());
+                holder.sign_confirm_yes_button.setTextColor(Color.GRAY);
+                break;
+            case SignMessage.CONFIRMED_WRONG:
+                holder.receive_msg_view.setVisibility(View.VISIBLE);
+                holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
+                holder.receive_msg_content.setText(message.getTextContent());
+                holder.sign_confirm_no_button.setTextColor(Color.GRAY);
+
+                holder.sign_recapture_dialog.setVisibility(View.VISIBLE);
+                holder.sign_recapture_yes_button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d(TAG, "onClick: 手语re采集 回调");
+                        holder.sign_recapture_yes_button.setTextColor(Color.GRAY);
+                        message.setSignFeedbackStatus(SignMessage.INITIAL);
+                        // todo 这里进行 手语re采集回调
+                        recaptureRequest(message);
+                        setHolderViewByMsgState(holder, message);
+
+                    }
+                });
+                holder.sign_recapture_no_button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        holder.sign_recapture_no_button.setTextColor(Color.GRAY);
+                        message.setSignFeedbackStatus(SignMessage.NO_RECAPTURE);
+                        setHolderViewByMsgState(holder, message);
+                    }
+                });
+                break;
+            case SignMessage.NO_RECAPTURE:
+                holder.receive_msg_view.setVisibility(View.VISIBLE);
+                holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
+                holder.receive_msg_content.setText(message.getTextContent());
+                holder.sign_confirm_no_button.setTextColor(Color.GRAY);
+
+                holder.sign_recapture_dialog.setVisibility(View.VISIBLE);
+                holder.sign_recapture_no_button.setTextColor(Color.GRAY);
+                break;
+        }
+    }
+
+    private void recaptureRequest(SignMessage msg) {
+        SocketConnectionManager.getInstance()
+                .sendMessage(InputControlPanelFragment
+                        .buildSignRecognizeRequest(msg.getMsgId()));
+    }
 
     @Override
     public int getItemCount() {

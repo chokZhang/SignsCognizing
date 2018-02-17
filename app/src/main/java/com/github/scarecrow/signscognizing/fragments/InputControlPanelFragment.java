@@ -63,7 +63,7 @@ public class InputControlPanelFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 SocketConnectionManager.getInstance()
-                        .sendMessage(buildSignRecognizeRequest());
+                        .sendMessage(buildSignRecognizeRequest(0));
                 MessageManager.getInstance()
                         .buildSignMessage();
             }
@@ -86,7 +86,7 @@ public class InputControlPanelFragment extends Fragment {
      *
      * @return 请求的json
      */
-    private String buildSignRecognizeRequest() {
+    public static String buildSignRecognizeRequest(int sign_id) {
         String armband_id = ArmbandManager.getArmbandsManger()
                 .getCurrentConnectedArmband()
                 .getArmband_id();
@@ -95,7 +95,7 @@ public class InputControlPanelFragment extends Fragment {
             request_body.accumulate("control", "sign_cognize_request");
             JSONObject data = new JSONObject();
             data.accumulate("armband_id", armband_id);
-            data.accumulate("request_id", 0);
+            data.accumulate("request_id", sign_id);
             request_body.accumulate("data", data);
         } catch (Exception ee) {
             Log.e(TAG, "buildSignRecognizeRequest: on build request json " + ee);
@@ -104,8 +104,7 @@ public class InputControlPanelFragment extends Fragment {
         return request_body.toString();
     }
     /*
-        todo :
-        "data": {"sign_id" :0} sign_id字段使用0 标识
+        todo : "data": {"sign_id" :0} sign_id字段使用0 标识
      */
 
 }

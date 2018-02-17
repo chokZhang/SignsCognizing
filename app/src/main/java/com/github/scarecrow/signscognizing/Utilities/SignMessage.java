@@ -6,7 +6,9 @@ package com.github.scarecrow.signscognizing.Utilities;
  */
 
 public class SignMessage extends ConversationMessage {
-    public static final int HAD_CONFIRMED = 564,
+    public static final int CONFIRMED_CORRECT = 564,
+            CONFIRMED_WRONG = 456,
+            NO_RECAPTURE = 789,
             INITIAL = 2541;
 
     private int sign_feedback_stauts;
@@ -19,7 +21,7 @@ public class SignMessage extends ConversationMessage {
         sign_feedback_stauts = INITIAL;
     }
 
-    public void setSignFeedbackStauts(int stauts) {
+    public void setSignFeedbackStatus(int stauts) {
         sign_feedback_stauts = stauts;
     }
 
