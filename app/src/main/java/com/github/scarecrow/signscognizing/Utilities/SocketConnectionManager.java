@@ -40,12 +40,10 @@ public class SocketConnectionManager {
     public static final int DISCONNECTED = 979,
             CONNECTED = 56;
 
-    private static SocketConnectionManager instance = new SocketConnectionManager();
-
-    private SocketCommunicatorThread socket_communicator;
-
     private int manager_status = DISCONNECTED;
 
+    private static SocketConnectionManager instance = new SocketConnectionManager();
+    private SocketCommunicatorThread socket_communicator;
     private List<TaskCompleteCallback> listener_list;
 
     public static SocketConnectionManager getInstance() {

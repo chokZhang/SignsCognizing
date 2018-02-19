@@ -70,20 +70,12 @@ public class InputControlPanelFragment extends Fragment {
         });
 
         //语音输入
-        bt = view.findViewById(R.id.button_input_panel_voice_start);
-        bt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MessageManager.getInstance()
-                        .buildVoiceMessage("hhhhh");
-                //todo 这里发起语音识别
-            }
-        });
     }
 
     /**
-     * 此处为新增手语识别
-     *
+     * 手语识别请求体构造
+     * 如果是新增识别， 的 sign_id字段使用0 标识
+     *  如："data": {"sign_id" :0}
      * @return 请求的json
      */
     public static String buildSignRecognizeRequest(int sign_id) {
@@ -103,8 +95,5 @@ public class InputControlPanelFragment extends Fragment {
         }
         return request_body.toString();
     }
-    /*
-        todo : "data": {"sign_id" :0} sign_id字段使用0 标识
-     */
 
 }

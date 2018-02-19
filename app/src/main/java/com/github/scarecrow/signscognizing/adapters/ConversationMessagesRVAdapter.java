@@ -180,7 +180,6 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
                         Log.d(TAG, "onClick: 手语re采集 回调");
                         holder.sign_recapture_yes_button.setTextColor(Color.GRAY);
                         message.setSignFeedbackStatus(SignMessage.INITIAL);
-                        // todo 这里进行 手语re采集回调
                         recaptureRequest(message);
                         setHolderViewByMsgState(holder, message);
 

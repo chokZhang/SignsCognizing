@@ -22,10 +22,9 @@
             android:text="@string/手语识别"
             android:layout_marginBottom="30dp" />
 
-        <Button
+        <com.github.scarecrow.signscognizing.adapters.VoiceRecordButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/button_input_panel_voice_start"
             android:textSize="30sp"
             android:text="@string/输入语音"
             android:layout_marginBottom="30dp" />

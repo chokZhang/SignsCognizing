@@ -4,6 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.fragments.ArmbandSelectFragment;
@@ -11,6 +12,9 @@ import com.github.scarecrow.signscognizing.fragments.ConversationDisplayFragment
 import com.github.scarecrow.signscognizing.fragments.InfoDisplayFragment;
 import com.github.scarecrow.signscognizing.fragments.InputControlPanelFragment;
 import com.github.scarecrow.signscognizing.fragments.StartControlPanelFragment;
+import com.iflytek.cloud.InitListener;
+import com.iflytek.cloud.SpeechRecognizer;
+import com.iflytek.cloud.SpeechUtility;
 
 public class MainActivity extends AppCompatActivity {
     // 各个fragment的代号 在切换fragment的时候可以由外部调用。
@@ -26,9 +30,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         switchFragment(FRAGMENT_START_CONTROL);
         switchFragment(FRAGMENT_INFO_DISPLAY);
+        SpeechUtility.createUtility(getApplicationContext(), "appid=5a883f0c");
+        SpeechRecognizer speechRecognizer
+                = SpeechRecognizer.createRecognizer(getApplicationContext(), new InitListener() {
+            @Override
+            public void onInit(int code) {
+                Log.d("", "SpeechRecognizer init() code = " + code);
+            }
+        });
+        Log.e("", "onCreate: " + speechRecognizer);
 
     }
 
