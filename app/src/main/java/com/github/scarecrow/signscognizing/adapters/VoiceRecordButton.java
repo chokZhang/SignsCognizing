@@ -14,8 +14,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.scarecrow.signscognizing.R;
+import com.github.scarecrow.signscognizing.Utilities.AudioRecorderConfiguration;
+import com.github.scarecrow.signscognizing.Utilities.ExtAudioRecorder;
 import com.github.scarecrow.signscognizing.Utilities.MessageManager;
-import com.github.scarecrow.signscognizing.Utilities.VoiceMessage;
 import com.github.scarecrow.signscognizing.Utilities.VoiceRecorder;
 
 import static android.content.ContentValues.TAG;
@@ -29,8 +30,23 @@ public class VoiceRecordButton extends AppCompatButton {
     private static final int RECORD_ON = -5,
             RECORD_OFF = -9;
 
-    private VoiceRecorder recorder = new VoiceRecorder();
     private Thread record_timer_thread;
+    @SuppressLint("HandlerLeak")
+    private Handler recorder_ui_handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            double voice_value = (double) msg.obj;
+            setRecorderValueImg(voice_value);
+        }
+    };
+
+
+    private VoiceRecorder recorder = new VoiceRecorder();
+    private ExtAudioRecorder new_recorder = new ExtAudioRecorder(AudioRecorderConfiguration
+            .createDefaultSetting()
+            .handler(recorder_ui_handler)
+            .build());
+
 
     private double recording_time = 0.0,
             voice_value = 0.0;
@@ -63,8 +79,8 @@ public class VoiceRecordButton extends AppCompatButton {
                     record_timer_thread.start();
 
                     Log.d(TAG, "onTouchEvent: recorder start record");
-                    recorder.prepare();
-                    recorder.start();
+                    new_recorder.prepare();
+                    new_recorder.start();
                     init_y = event.getY();
                     updateVoiceDialog(false);
                 }
@@ -87,21 +103,25 @@ public class VoiceRecordButton extends AppCompatButton {
                 record_timer_thread.interrupt();
                 this.setText("语音输入");
                 if (is_cancel) {
-                    recorder.stop();
+                    new_recorder.stop();
                 } else {
                     if (recording_time <= 1) {
                         Log.d(TAG, "onTouchEvent: " + recording_time);
                         Toast.makeText(getContext(), "语音时间太短", Toast.LENGTH_LONG)
                                 .show();
-                        recorder.stop();
+                        new_recorder.stop();
                     } else {
-                        String voice_file_path = recorder.complete();
-                        VoiceMessage voiceMessage = MessageManager.getInstance()
-                                .buildVoiceMessage(voice_file_path);
+                        String voice_file_path = new_recorder.complete();
+                        if (voice_file_path.charAt(0) != '/')
+                            Log.e(TAG, "onTouchEvent: error in complete record: "
+                                    + voice_file_path);
+                        else
+                            MessageManager.getInstance()
+                                    .buildVoiceMessage(voice_file_path);
                     }
 
                 }
-
+                new_recorder.reset();
                 break;
         }
         return true;
@@ -143,26 +163,15 @@ public class VoiceRecordButton extends AppCompatButton {
                     Thread.sleep(100);
                     Log.d(TAG, "timer: " + recording_time);
                     recording_time += 0.1;
-                    if (!is_cancel)
-                        recorder_ui_handler.obtainMessage(0, recorder.get_voice_amplitude())
-                                .sendToTarget();
-
                 } catch (InterruptedException e) {
                 }
             }
         }
     };
 
-    @SuppressLint("HandlerLeak")
-    private Handler recorder_ui_handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            double voice_value = (double) msg.obj;
-            set_recorder_value_img(voice_value);
-        }
-    };
 
-    private void set_recorder_value_img(double voiceValue) {
+    private void setRecorderValueImg(double voiceValue) {
+        voiceValue *= 10;
         if (voiceValue < 600.0) {
             dialog_img.setImageResource(R.mipmap.record_animate_01);
         } else if (voiceValue > 600.0 && voiceValue < 1000.0) {

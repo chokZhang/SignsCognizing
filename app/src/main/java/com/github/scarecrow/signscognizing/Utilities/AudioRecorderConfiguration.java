@@ -8,9 +8,9 @@ import android.os.Handler;
  * Created by Scarecrow on 2018/2/19.
  */
 
-public class AuditRecorderConfiguration {
+public class AudioRecorderConfiguration {
 
-    public static final int[] SAMPLE_RATES = {44100, 22050, 11025, 8000};
+    public static final int[] SAMPLE_RATES = {44100, 22050, 16000, 11025, 8000};
     public static final boolean RECORDING_UNCOMPRESSED = true;
     public static final boolean RECORDING_COMPRESSED = false;
 
@@ -33,8 +33,8 @@ public class AuditRecorderConfiguration {
      * <li>format = {@link AudioFormat#ENCODING_PCM_16BIT}</li>
      * </ul>
      */
-    public static AuditRecorderConfiguration createDefault() {
-        return new Builder().builder();
+    public static Builder createDefaultSetting() {
+        return new Builder();
     }
 
 
@@ -67,7 +67,7 @@ public class AuditRecorderConfiguration {
         return channelConfig;
     }
 
-    private AuditRecorderConfiguration(Builder builder) {
+    private AudioRecorderConfiguration(Builder builder) {
         this.uncompressed = builder.uncompressed;
         this.timerInterval = builder.timerInterval;
         this.rate = builder.rate;
@@ -78,10 +78,10 @@ public class AuditRecorderConfiguration {
     }
 
     public static class Builder {
-        private boolean uncompressed;
+        private boolean uncompressed = true;
         private int timerInterval = 120;
-        private int rate = SAMPLE_RATES[3];
-        private int source = MediaRecorder.AudioSource.MIC;
+        private int rate = SAMPLE_RATES[2];
+        private int source = MediaRecorder.AudioSource.DEFAULT;
         private int channelConfig = AudioFormat.CHANNEL_CONFIGURATION_MONO;
         private int format = AudioFormat.ENCODING_PCM_16BIT;
         private Handler handler;
@@ -142,8 +142,8 @@ public class AuditRecorderConfiguration {
             return this;
         }
 
-        public AuditRecorderConfiguration builder() {
-            return new AuditRecorderConfiguration(this);
+        public AudioRecorderConfiguration build() {
+            return new AudioRecorderConfiguration(this);
         }
     }
 }

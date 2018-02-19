@@ -3,6 +3,7 @@ package com.github.scarecrow.signscognizing.Utilities;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Environment;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
@@ -10,7 +11,10 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by Scarecrow on 2018/2/19.
@@ -18,10 +22,10 @@ import java.util.Date;
 
 public class ExtAudioRecorder {
 
-    private AuditRecorderConfiguration configuration;
+    private AudioRecorderConfiguration configuration;
 
 
-    public ExtAudioRecorder(AuditRecorderConfiguration configuration) {
+    public ExtAudioRecorder(AudioRecorderConfiguration configuration) {
         this.configuration = configuration;
 
         if (configuration.isUncompressed()) {
@@ -35,12 +39,12 @@ public class ExtAudioRecorder {
             do {
                 init(configuration.isUncompressed(),
                         configuration.getSource(),
-                        AuditRecorderConfiguration.SAMPLE_RATES[i],
+                        AudioRecorderConfiguration.SAMPLE_RATES[i],
                         configuration.getChannelConfig(),
                         configuration.getFormat());
 
             }
-            while ((++i < AuditRecorderConfiguration.SAMPLE_RATES.length) & !(getState() == ExtAudioRecorder.State.INITIALIZING));
+            while ((++i < AudioRecorderConfiguration.SAMPLE_RATES.length) & !(getState() == ExtAudioRecorder.State.INITIALIZING));
         }
     }
 
@@ -104,6 +108,9 @@ public class ExtAudioRecorder {
 
     private String filePath;
 
+    private static String fileFolder = Environment.getExternalStorageDirectory()
+            .getPath() + "/sign_recognize_voice_cache/";
+
     /**
      * 返回录音的状态
      *
@@ -117,23 +124,27 @@ public class ExtAudioRecorder {
      *
      * Method used for recording.
      */
-    private AudioRecord.OnRecordPositionUpdateListener updateListener = new AudioRecord.OnRecordPositionUpdateListener() {
+    private AudioRecord.OnRecordPositionUpdateListener updateListener
+            = new AudioRecord.OnRecordPositionUpdateListener() {
+        @Override
         public void onPeriodicNotification(AudioRecord recorder) {
             audioRecorder.read(buffer, 0, buffer.length); // Fill buffer
             try {
-                randomAccessWriter.write(buffer); // Write buffer to file
-                payloadSize += buffer.length;
-                if (samples == 16) {
-                    for (int i = 0; i < buffer.length / 2; i++) { // 16bit sample size
-                        short curSample = getShort(buffer[i * 2], buffer[i * 2 + 1]);
-                        if (curSample > cAmplitude) { // Check amplitude
-                            cAmplitude = curSample;
+                if (state == State.RECORDING) {
+                    randomAccessWriter.write(buffer); // Write buffer to file
+                    payloadSize += buffer.length;
+                    if (samples == 16) {
+                        for (int i = 0; i < buffer.length / 2; i++) { // 16bit sample size
+                            short curSample = getShort(buffer[i * 2], buffer[i * 2 + 1]);
+                            if (curSample > cAmplitude) { // Check amplitude
+                                cAmplitude = curSample;
+                            }
                         }
-                    }
-                } else { // 8bit sample size
-                    for (int i = 0; i < buffer.length; i++) {
-                        if (buffer[i] > cAmplitude) { // Check amplitude
-                            cAmplitude = buffer[i];
+                    } else { // 8bit sample size
+                        for (int i = 0; i < buffer.length; i++) {
+                            if (buffer[i] > cAmplitude) { // Check amplitude
+                                cAmplitude = buffer[i];
+                            }
                         }
                     }
                 }
@@ -144,6 +155,7 @@ public class ExtAudioRecorder {
             }
         }
 
+        @Override
         public void onMarkerReached(AudioRecord recorder) {
             // NOT USED
         }
@@ -154,11 +166,14 @@ public class ExtAudioRecorder {
      *
      * @param uncompressed  是否压缩录音 true不压缩，false压缩
      * @param audioSource   音频源：指的是从哪里采集音频。通过 {@link AudioRecord} 的一些常量去设置
-     * @param sampleRate    采样率：音频的采样频率，每秒钟能够采样的次数，采样率越高，音质越高。给出的实例是44100、22050、11025但不限于这几个参数。
+     * @param sampleRate    采样率：音频的采样频率，每秒钟能够采样的次数，采样率越高，音质越高。
+     *                      给出的实例是44100、22050、11025但不限于这几个参数。
      *                      例如要采集低质量的音频就可以使用4000、8000等低采样率。
      * @param channelConfig 声道设置：Android支持双声道立体声和单声道。MONO单声道，STEREO立体声
-     * @param audioFormat   编码制式和采样大小：采集来的数据当然使用PCM编码(脉冲代码调制编码，即PCM编码。PCM通过抽样、量化、编码三个步骤将连续变化的模拟信号转换为数字编码。)
-     *                      android支持的采样大小16bit 或者8bit。当然采样大小越大，那么信息量越多，音质也越高，现在主流的采样大小都是16bit，在低质量的语音传输的时候8bit足够了。
+     * @param audioFormat   编码制式和采样大小：采集来的数据当然使用PCM编码(脉冲代码调制编码，即PCM编码。
+     *                      PCM通过抽样、量化、编码三个步骤将连续变化的模拟信号转换为数字编码。)
+     *                      android支持的采样大小16bit 或者8bit。当然采样大小越大，那么信息量越多，
+     *                      ，现在主流的采样大小都是16bit，在低质量的语音传输的时候8bit足够了。
      */
     private void init(boolean uncompressed, int audioSource, int sampleRate, int channelConfig, int audioFormat) {
         try {
@@ -177,15 +192,15 @@ public class ExtAudioRecorder {
 
                 framePeriod = sampleRate * configuration.getTimerInterval() / 1000;
                 bufferSize = framePeriod * 2 * samples * channels / 8;
-                if (bufferSize < AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)) {
-                    // Check to make sure
-                    // buffer size is not
-                    // smaller than the
-                    // smallest allowed one
-                    bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+                int min_buffer_size = AudioRecord
+                        .getMinBufferSize(sampleRate, channelConfig, audioFormat);
+                if (bufferSize < min_buffer_size) {
+                    // Check to make sure buffer size is not smaller than the smallest allowed one
+                    bufferSize = min_buffer_size;
                     // Set frame period and timer interval accordingly
                     framePeriod = bufferSize / (2 * samples * channels / 8);
-                    Log.w(ExtAudioRecorder.class.getName(), "Increasing buffer size to " + Integer.toString(bufferSize));
+                    Log.w(ExtAudioRecorder.class.getName(),
+                            "Increasing buffer size to " + Integer.toString(bufferSize));
                 }
 
                 audioRecorder = new AudioRecord(audioSource, sampleRate, channelConfig, audioFormat, bufferSize);
@@ -213,15 +228,16 @@ public class ExtAudioRecorder {
         }
     }
 
+
     /**
      * 设置输出的文件路径
-     *
-     * @param argPath 文件路径
      */
-    public void setOutputFile(String argPath) {
+    public void acquireOutputFile() {
         try {
             if (state == State.INITIALIZING) {
-                filePath = argPath;
+
+                filePath = fileFolder + getCurrentDate() + ".pcm";
+                //todo 这里默认为pcm文件了
                 if (!configuration.isUncompressed()) {
                     mediaRecorder.setOutputFile(filePath);
                 }
@@ -237,13 +253,20 @@ public class ExtAudioRecorder {
         }
     }
 
+    private String getCurrentDate() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HHmmss");
+        Date curDate = new Date(System.currentTimeMillis());// 获取当前时间
+        return formatter.format(curDate);
+    }
+
+
     /**
      * Returns the largest amplitude sampled since the last call to this method.
      *
      * @return returns the largest amplitude since the last call, or 0 when not
      * in recording state.
      */
-    public int getMaxAmplitude() {
+    private int getMaxAmplitude() {
         if (state == State.RECORDING) {
             if (configuration.isUncompressed()) {
                 int result = cAmplitude;
@@ -269,6 +292,7 @@ public class ExtAudioRecorder {
     public void prepare() {
         try {
             if (state == State.INITIALIZING) {
+                acquireOutputFile();
                 if (configuration.isUncompressed()) {
                     if ((audioRecorder.getState() == AudioRecord.STATE_INITIALIZED) & (filePath != null)) {
                         // 写文件头
@@ -346,23 +370,18 @@ public class ExtAudioRecorder {
             }
         }
 
-        if (configuration.isUncompressed()) {
-            if (audioRecorder != null) {
-                audioRecorder.release();
-            }
-        } else {
-            if (mediaRecorder != null) {
-                mediaRecorder.release();
-            }
-        }
+        if (audioRecorder != null)
+            audioRecorder.release();
+
     }
 
-    public void discardRecording() {
-        stop();
+    public void stop() {
+        complete();
 
         File file = new File(filePath);
         if (file.exists() && !file.isDirectory()) {
             file.delete();
+            filePath = null;
         }
     }
 
@@ -371,26 +390,24 @@ public class ExtAudioRecorder {
      * 这个方法不会抛出异常，但是会设置状态为 {@link State#ERROR}
      */
     public void reset() {
+        Log.d("ExtAudioRecorder", "on reset called");
         try {
-            if (state != State.ERROR) {
-                release();
-                filePath = null; // Reset file path
-                cAmplitude = 0; // Reset amplitude
-                if (configuration.isUncompressed()) {
-                    audioRecorder = new AudioRecord(configuration.getSource(), configuration.getRate(),
-                            channels + 1, configuration.getFormat(), bufferSize);
-                    audioRecorder.setRecordPositionUpdateListener(updateListener);
-                    audioRecorder.setPositionNotificationPeriod(framePeriod);
-                } else {
-                    mediaRecorder = new MediaRecorder();
-                    mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                    mediaRecorder
-                            .setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-                    mediaRecorder
-                            .setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-                }
-                state = State.INITIALIZING;
+            filePath = null; // Reset file path
+            cAmplitude = 0; // Reset amplitude
+            if (configuration.isUncompressed()) {
+                audioRecorder = new AudioRecord(configuration.getSource(), configuration.getRate(),
+                        channels + 1, configuration.getFormat(), bufferSize);
+                audioRecorder.setRecordPositionUpdateListener(updateListener);
+                audioRecorder.setPositionNotificationPeriod(framePeriod);
+            } else {
+                mediaRecorder = new MediaRecorder();
+                mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                mediaRecorder
+                        .setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                mediaRecorder
+                        .setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             }
+            state = State.INITIALIZING;
         } catch (Exception e) {
             Log.e(ExtAudioRecorder.class.getName(), e.getMessage());
             state = State.ERROR;
@@ -398,7 +415,8 @@ public class ExtAudioRecorder {
     }
 
     /**
-     * 开始录音，并设置 state 为 {@link State#RECORDING}。在调用这个方法前必须调用 {@link ExtAudioRecorder#prepare()} 方法
+     * 开始录音，并设置 state 为 {@link State#RECORDING}。
+     * 在调用这个方法前必须调用 {@link ExtAudioRecorder#prepare()} 方法
      */
     public void start() {
         if (state == State.READY) {
@@ -419,11 +437,12 @@ public class ExtAudioRecorder {
     }
 
     /**
-     * 停止录音，并设置 state 为 {@link State#STOPPED}。如果要继续使用，则需要调用 {@link #reset()} 方法
+     * 停止录音，并设置 state 为 {@link State#STOPPED}。
+     * 如果要继续使用，则需要调用 {@link #reset()} 方法
      *
      * @return 录音的时间
      */
-    public int stop() {
+    public String complete() {
         if (state == State.RECORDING) {
             if (configuration.isUncompressed()) {
                 audioRecorder.stop();
@@ -437,6 +456,7 @@ public class ExtAudioRecorder {
                     randomAccessWriter.writeInt(Integer.reverseBytes(payloadSize));
 
                     randomAccessWriter.close();
+                    Log.d(TAG, "on complete: voice file writing task");
                 } catch (IOException e) {
                     Log.e(ExtAudioRecorder.class.getName(),
                             "I/O exception occured while closing output file");
@@ -454,18 +474,18 @@ public class ExtAudioRecorder {
             if (file.exists() && file.isFile()) {
                 if (file.length() == 0L) {
                     file.delete();
-                    return 0;
+                    return "文件长度为0";
                 } else {
                     int time = (int) ((new Date()).getTime() - this.startTime) / 1000;
-                    return time;
+                    return filePath;
                 }
             } else {
-                return 0;
+                return "文件不存在";
             }
         } else {
             Log.e(ExtAudioRecorder.class.getName(), "stop() called on illegal state");
             state = State.ERROR;
-            return 0;
+            return "recorder状态错误";
         }
     }
 
@@ -475,10 +495,11 @@ public class ExtAudioRecorder {
                 public void run() {
                     while (true) {
                         if (state == State.RECORDING) {
-                            Message var1 = new Message();
-                            var1.what = getMaxAmplitude() * 13 / 32767;
-                            configuration.getHandler().sendMessage(var1);
-                            SystemClock.sleep(100L);
+                            double curr_amplitude = getMaxAmplitude() / 20;
+                            Log.d(TAG, "run: curr_amplitude: " + curr_amplitude);
+                            configuration.getHandler().obtainMessage(0, curr_amplitude)
+                                    .sendToTarget();
+                            SystemClock.sleep(100);
                             continue;
                         }
                         return;
