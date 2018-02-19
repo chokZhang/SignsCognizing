@@ -4,7 +4,6 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Environment;
-import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -18,6 +17,13 @@ import static android.content.ContentValues.TAG;
 
 /**
  * Created by Scarecrow on 2018/2/19.
+ * 一个扩展的音频录制类 封装的自带的两个类 支持pcm和amr格式的录音
+ * 使用方法 ：先构造一个AudioRecorderConfiguration 设置其录制方式及格式
+ * 调用初始化将其传入 同时内部会构造两个原生类 获取资源
+ *  prepare() 构造文件 及文件头
+ *  start()  开始录音
+ *  stop() 停止录音并删除文件 complete()停止录音并保存文件
+ *  reset() 恢复至prepare()前的状态 准备下一次调用
  */
 
 public class ExtAudioRecorder {
@@ -232,12 +238,12 @@ public class ExtAudioRecorder {
     /**
      * 设置输出的文件路径
      */
-    public void acquireOutputFile() {
+    private void acquireOutputFile() {
         try {
             if (state == State.INITIALIZING) {
 
                 filePath = fileFolder + getCurrentDate() + ".pcm";
-                //todo 这里默认为pcm文件了
+                //这里默认为pcm文件了
                 if (!configuration.isUncompressed()) {
                     mediaRecorder.setOutputFile(filePath);
                 }
@@ -284,6 +290,7 @@ public class ExtAudioRecorder {
         }
     }
 
+
     /**
      * 准备录音的录音机, 如果 state 不是 {@link State#INITIALIZING} 或文件路径为null
      * 将设置 state 为 {@link State#ERROR}。如果发生异常不会抛出，而是设置 state 为
@@ -291,42 +298,12 @@ public class ExtAudioRecorder {
      */
     public void prepare() {
         try {
-            if (state == State.INITIALIZING) {
+            if (state == State.INITIALIZING || state == State.ERROR) {
                 acquireOutputFile();
                 if (configuration.isUncompressed()) {
                     if ((audioRecorder.getState() == AudioRecord.STATE_INITIALIZED) & (filePath != null)) {
                         // 写文件头
-                        randomAccessWriter = new RandomAccessFile(filePath, "rw");
-                        //设置文件长度为0，为了防止这个file以存在
-                        randomAccessWriter.setLength(0);
-                        randomAccessWriter.writeBytes("RIFF");
-                        //不知道文件最后的大小，所以设置0
-                        randomAccessWriter.writeInt(0);
-                        randomAccessWriter.writeBytes("WAVE");
-                        randomAccessWriter.writeBytes("fmt ");
-                        // Sub-chunk
-                        // size,
-                        // 16
-                        // for
-                        // PCM
-                        randomAccessWriter.writeInt(Integer.reverseBytes(16));
-                        // AudioFormat, 1 为 PCM
-                        randomAccessWriter.writeShort(Short.reverseBytes((short) 1));
-                        // 数字为声道, 1 为 mono, 2 为 stereo
-                        randomAccessWriter.writeShort(Short.reverseBytes(channels));
-                        // 采样率
-                        randomAccessWriter.writeInt(Integer.reverseBytes(configuration.getRate()));
-                        // 采样率, SampleRate*NumberOfChannels*BitsPerSample/8
-                        randomAccessWriter.writeInt(Integer.reverseBytes(configuration.getRate() * samples * channels / 8));
-                        randomAccessWriter.writeShort(Short.reverseBytes((short) (channels * samples / 8)));
-                        // Block
-                        // align,
-                        // NumberOfChannels*BitsPerSample/8
-                        randomAccessWriter.writeShort(Short.reverseBytes(samples)); // Bits per sample
-                        randomAccessWriter.writeBytes("data");
-                        randomAccessWriter.writeInt(0); // Data chunk size not
-                        // known yet, write 0
-
+                        createVoiceFileHeader();
                         buffer = new byte[framePeriod * samples / 8 * channels];
                         state = State.READY;
                     } else {
@@ -353,6 +330,40 @@ public class ExtAudioRecorder {
         }
     }
 
+    private void createVoiceFileHeader() throws IOException {
+        randomAccessWriter = new RandomAccessFile(filePath, "rw");
+        //设置文件长度为0，为了防止这个file以存在
+        randomAccessWriter.setLength(0);
+        randomAccessWriter.writeBytes("RIFF");
+        //不知道文件最后的大小，所以设置0
+        randomAccessWriter.writeInt(0);
+        randomAccessWriter.writeBytes("WAVE");
+        randomAccessWriter.writeBytes("fmt ");
+        // Sub-chunk
+        // size,
+        // 16
+        // for
+        // PCM
+        randomAccessWriter.writeInt(Integer.reverseBytes(16));
+        // AudioFormat, 1 为 PCM
+        randomAccessWriter.writeShort(Short.reverseBytes((short) 1));
+        // 数字为声道, 1 为 mono, 2 为 stereo
+        randomAccessWriter.writeShort(Short.reverseBytes(channels));
+        // 采样率
+        randomAccessWriter.writeInt(Integer.reverseBytes(configuration.getRate()));
+        // 采样率, SampleRate*NumberOfChannels*BitsPerSample/8
+        randomAccessWriter.writeInt(Integer.reverseBytes(configuration.getRate() * samples * channels / 8));
+        randomAccessWriter.writeShort(Short.reverseBytes((short) (channels * samples / 8)));
+        // Block
+        // align,
+        // NumberOfChannels*BitsPerSample/8
+        randomAccessWriter.writeShort(Short.reverseBytes(samples)); // Bits per sample
+        randomAccessWriter.writeBytes("data");
+        randomAccessWriter.writeInt(0);
+        // Data chunk size don't known yet, write 0
+
+    }
+
     /**
      * 释放与这个类相关的资源，和移除不必要的文件，在必要的时候
      */
@@ -375,6 +386,9 @@ public class ExtAudioRecorder {
 
     }
 
+    /**
+     * 停止录音 会删除录下的文件
+     */
     public void stop() {
         complete();
 
@@ -386,7 +400,8 @@ public class ExtAudioRecorder {
     }
 
     /**
-     * 重置录音，并设置 state 为 {@link State#INITIALIZING}，如果当前状态为 {@link State#RECORDING}，将会停止录音。
+     * 重置录音，并设置 state 为 {@link State#INITIALIZING}，
+     * 如果当前状态为 {@link State#RECORDING}，将会停止录音。
      * 这个方法不会抛出异常，但是会设置状态为 {@link State#ERROR}
      */
     public void reset() {
@@ -437,9 +452,9 @@ public class ExtAudioRecorder {
     }
 
     /**
-     * 停止录音，并设置 state 为 {@link State#STOPPED}。
+     * 完成录音，并设置 state 为 {@link State#STOPPED}。
      * 如果要继续使用，则需要调用 {@link #reset()} 方法
-     *
+     * 这个方法会保存录下的音频文件 并返回音频文件的URI
      * @return 录音的时间
      */
     public String complete() {

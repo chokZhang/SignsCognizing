@@ -17,12 +17,12 @@ import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.AudioRecorderConfiguration;
 import com.github.scarecrow.signscognizing.Utilities.ExtAudioRecorder;
 import com.github.scarecrow.signscognizing.Utilities.MessageManager;
-import com.github.scarecrow.signscognizing.Utilities.VoiceRecorder;
 
 import static android.content.ContentValues.TAG;
 
 /**
  * Created by Scarecrow on 2018/2/18.
+ * 仿微信可通过手势控制的音频录制按钮
  */
 
 public class VoiceRecordButton extends AppCompatButton {
@@ -40,9 +40,7 @@ public class VoiceRecordButton extends AppCompatButton {
         }
     };
 
-
-    private VoiceRecorder recorder = new VoiceRecorder();
-    private ExtAudioRecorder new_recorder = new ExtAudioRecorder(AudioRecorderConfiguration
+    private ExtAudioRecorder recorder = new ExtAudioRecorder(AudioRecorderConfiguration
             .createDefaultSetting()
             .handler(recorder_ui_handler)
             .build());
@@ -79,8 +77,8 @@ public class VoiceRecordButton extends AppCompatButton {
                     record_timer_thread.start();
 
                     Log.d(TAG, "onTouchEvent: recorder start record");
-                    new_recorder.prepare();
-                    new_recorder.start();
+                    recorder.prepare();
+                    recorder.start();
                     init_y = event.getY();
                     updateVoiceDialog(false);
                 }
@@ -103,15 +101,15 @@ public class VoiceRecordButton extends AppCompatButton {
                 record_timer_thread.interrupt();
                 this.setText("语音输入");
                 if (is_cancel) {
-                    new_recorder.stop();
+                    recorder.stop();
                 } else {
                     if (recording_time <= 1) {
                         Log.d(TAG, "onTouchEvent: " + recording_time);
                         Toast.makeText(getContext(), "语音时间太短", Toast.LENGTH_LONG)
                                 .show();
-                        new_recorder.stop();
+                        recorder.stop();
                     } else {
-                        String voice_file_path = new_recorder.complete();
+                        String voice_file_path = recorder.complete();
                         if (voice_file_path.charAt(0) != '/')
                             Log.e(TAG, "onTouchEvent: error in complete record: "
                                     + voice_file_path);
@@ -121,7 +119,7 @@ public class VoiceRecordButton extends AppCompatButton {
                     }
 
                 }
-                new_recorder.reset();
+                recorder.reset();
                 break;
         }
         return true;
@@ -152,6 +150,10 @@ public class VoiceRecordButton extends AppCompatButton {
 
     }
 
+
+    /**
+     * 计时器 用于记录录音长度
+     */
     private Runnable timer = new Runnable() {
         @Override
         public void run() {
@@ -201,6 +203,10 @@ public class VoiceRecordButton extends AppCompatButton {
         } else if (voiceValue > 12000.0) {
             dialog_img.setImageResource(R.mipmap.record_animate_14);
         }
+    }
+
+    public void releaseMediaResource() {
+        recorder.release();
     }
 
 

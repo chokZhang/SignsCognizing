@@ -14,6 +14,7 @@ import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.Utilities.MessageManager;
 import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
 import com.github.scarecrow.signscognizing.activities.MainActivity;
+import com.github.scarecrow.signscognizing.adapters.VoiceRecordButton;
 
 import org.json.JSONObject;
 
@@ -54,6 +55,9 @@ public class InputControlPanelFragment extends Fragment {
                 activity.switchFragment(MainActivity.FRAGMENT_INFO_DISPLAY);
                 SocketConnectionManager.getInstance()
                         .disconnect();
+                VoiceRecordButton voiceRecordButton =
+                        view.findViewById(R.id.button_input_panel_voice_start);
+                voiceRecordButton.releaseMediaResource();
             }
         });
 

@@ -26,6 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="30sp"
+            android:id="@+id/button_input_panel_voice_start"
             android:text="@string/输入语音"
             android:layout_marginBottom="30dp" />
     </LinearLayout>
