@@ -6,6 +6,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -76,10 +77,11 @@ public class SocketCommunicatorThread extends HandlerThread {
                 .sendToTarget();
         listener_thread.interrupt();
         try {
-            client_sock.getOutputStream().close();
-            client_sock.getInputStream().close();
-            client_sock.close();
-
+            if (!client_sock.isClosed()) {
+                client_sock.getOutputStream().close();
+                client_sock.getInputStream().close();
+                client_sock.close();
+            }
         } catch (Exception ee) {
             Log.e(TAG, "disconnect: error: " + ee);
             ee.printStackTrace();
@@ -111,17 +113,29 @@ public class SocketCommunicatorThread extends HandlerThread {
     }
 
 
+    /**
+     * 向服务器发起一个post请求 告知服务器占用手环同时开启套接字接口
+     *
+     * @return 套接字连接端口号
+     * @throws Exception 中间遇到的exception
+     */
     private int getTargetPort() throws Exception {
 
         OkHttpClient okHttpClient = new OkHttpClient();
 
-        String param = "armband_id",
+        String param_name = "armband_id",
                 armband_id = ArmbandManager.getArmbandsManger()
                         .getCurrentConnectedArmband()
                         .getArmband_id();
+        // todo 这里为双手手环做准备
+        JSONObject json_param = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.put(armband_id);
+        json_param.accumulate("armbands_list", jsonArray);
+
 
         RequestBody requestBody = RequestBody
-                .create(MEDIA_TYPE_JSON, "?" + param + "=" + armband_id);
+                .create(MEDIA_TYPE_JSON, "?" + param_name + "=" + json_param);
         // 这里非常奇怪 必须要在第一个参数名前面加上 ? 才能使django接受post内容
         // 然后在进入请求处理方法时 这个问号居然还在参数名上
         Request request = new Request.Builder()
@@ -164,9 +178,11 @@ public class SocketCommunicatorThread extends HandlerThread {
     private void socketSend(String info) {
         Log.d(TAG, "handleMessage: seed info : " + info);
         try {
-            OutputStream outputStream = client_sock.getOutputStream();
-            outputStream.write(info.getBytes(Charset.forName("utf-8")));
-            outputStream.flush();
+            if (!client_sock.isClosed()) {
+                OutputStream outputStream = client_sock.getOutputStream();
+                outputStream.write(info.getBytes(Charset.forName("utf-8")));
+                outputStream.flush();
+            }
         } catch (Exception ee) {
             Log.e(TAG, "handleMessage: error in send info : " + ee);
             ee.printStackTrace();

@@ -46,6 +46,44 @@ public class SocketConnectionManager {
     private SocketCommunicatorThread socket_communicator;
     private List<TaskCompleteCallback> listener_list;
 
+    // 负责从连接线程接受消息然后通过回调与外界进行互动的handler
+    // 该处在主线程
+    @SuppressLint("HandlerLeak")
+    private Handler main_thread_handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case CONNECT_FAILED:
+                    ArmbandManager.getArmbandsManger()
+                            .setCurrentConnectedArmband(null);
+                    manager_status = DISCONNECTED;
+                    noticeListeners(CONNECT_FAILED, null);
+                    break;
+
+                case CONNECT_SUCCESS:
+                    manager_status = CONNECTED;
+                    noticeListeners(CONNECT_SUCCESS, null);
+                    break;
+
+                case RECEIVE_MESSAGE:
+                    String info = (String) msg.obj;
+                    Log.d(TAG, "handleMessage: receive message : " + info);
+                    noticeListeners(RECEIVE_MESSAGE, info);
+                    break;
+
+                case LOOPER_READY:
+                    socket_communicator.startConnection();
+                    break;
+
+                default:
+                    Log.e(TAG, "SocketConnectionManager handleMessage: unknown message " +
+                            "message_id : " + msg.what);
+                    break;
+            }
+
+        }
+    };
+
     public static SocketConnectionManager getInstance() {
         return instance;
     }
@@ -107,43 +145,6 @@ public class SocketConnectionManager {
         }
     }
 
-    // 负责从连接线程接受消息然后通过回调与外界进行互动的handler
-    // 该处在主线程
-    @SuppressLint("HandlerLeak")
-    private Handler main_thread_handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case CONNECT_FAILED:
-                    ArmbandManager.getArmbandsManger()
-                            .setCurrentConnectedArmband(null);
-                    manager_status = DISCONNECTED;
-                    noticeListeners(CONNECT_FAILED, null);
-                    break;
-
-                case CONNECT_SUCCESS:
-                    manager_status = CONNECTED;
-                    noticeListeners(CONNECT_SUCCESS, null);
-                    break;
-
-                case RECEIVE_MESSAGE:
-                    String info = (String) msg.obj;
-                    Log.d(TAG, "handleMessage: receive message : " + info);
-                    noticeListeners(RECEIVE_MESSAGE, info);
-                    break;
-
-                case LOOPER_READY:
-                    socket_communicator.startConnection();
-                    break;
-
-                default:
-                    Log.e(TAG, "SocketConnectionManager handleMessage: unknown message " +
-                            "message_id : " + msg.what);
-                    break;
-            }
-
-        }
-    };
 
     public interface TaskCompleteCallback {
         void onConnectSucceeded();

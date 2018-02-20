@@ -206,7 +206,8 @@ public class VoiceRecordButton extends AppCompatButton {
     }
 
     public void releaseMediaResource() {
-        recorder.release();
+        if (recorder != null)
+            recorder.release();
     }
 
 

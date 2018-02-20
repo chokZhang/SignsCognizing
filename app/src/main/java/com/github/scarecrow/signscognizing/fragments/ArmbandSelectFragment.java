@@ -119,7 +119,7 @@ public class ArmbandSelectFragment extends Fragment {
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //     ArmbandManager.getArmbandsManger().updateArmbandsList();
+                ArmbandManager.getArmbandsManger().updateArmbandsList();
                 armbands_rv.getAdapter().notifyDataSetChanged();
             }
         });

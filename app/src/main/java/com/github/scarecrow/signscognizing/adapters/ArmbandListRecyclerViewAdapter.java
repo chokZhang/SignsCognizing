@@ -61,6 +61,7 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
     public void onBindViewHolder(ArmbandListItemViewHolder holder, int position) {
         final Armband armband = armband_list.get(position);
         holder.info_display.setText(armband.toString());
+        holder.info_display.setBackgroundColor(Color.WHITE);
         if (armband.getArmband_status() == Armband.ARMBAND_OCCURPIED) {
             holder.info_display.setBackgroundColor(Color.LTGRAY);
             return;

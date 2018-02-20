@@ -50,14 +50,11 @@ public class InputControlPanelFragment extends Fragment {
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                SocketConnectionManager.getInstance()
+                        .disconnect();
                 MainActivity activity = (MainActivity) getActivity();
                 activity.switchFragment(MainActivity.FRAGMENT_ARMBANDS_SELECT);
                 activity.switchFragment(MainActivity.FRAGMENT_INFO_DISPLAY);
-                SocketConnectionManager.getInstance()
-                        .disconnect();
-                VoiceRecordButton voiceRecordButton =
-                        view.findViewById(R.id.button_input_panel_voice_start);
-                voiceRecordButton.releaseMediaResource();
             }
         });
 
@@ -100,4 +97,12 @@ public class InputControlPanelFragment extends Fragment {
         return request_body.toString();
     }
 
+    @Override
+    public void onStop() {
+        View view = getView();
+        VoiceRecordButton voiceRecordButton = (VoiceRecordButton)
+                view.findViewById(R.id.button_input_panel_voice_start);
+        voiceRecordButton.releaseMediaResource();
+        super.onStop();
+    }
 }
