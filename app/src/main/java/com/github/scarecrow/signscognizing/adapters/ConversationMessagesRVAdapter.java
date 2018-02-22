@@ -148,6 +148,7 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
                     public void onClick(View v) {
                         holder.sign_confirm_yes_button.setTextColor(Color.GRAY);
                         message.setSignFeedbackStatus(SignMessage.CONFIRMED_CORRECT);
+                        //todo 根据capture_id反馈正确
                         setHolderViewByMsgState(holder, message);
                     }
                 });

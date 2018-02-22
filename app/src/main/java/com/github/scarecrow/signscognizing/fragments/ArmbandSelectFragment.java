@@ -110,7 +110,7 @@ public class ArmbandSelectFragment extends Fragment {
                             public void onDisconnect() {
 
                             }
-                        });
+                        }, getContext());
             }
         });
         armbands_rv.setAdapter(adapter);

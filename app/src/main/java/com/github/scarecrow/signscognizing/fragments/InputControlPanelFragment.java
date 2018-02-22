@@ -23,8 +23,6 @@ import static android.content.ContentValues.TAG;
 /**
  * Created by Scarecrow on 2018/2/
  *
- * 记得在退出的时候 结束SocketCommunicator线程
- * 通过给ConnectionManager发消息
  */
 
 public class InputControlPanelFragment extends Fragment {
@@ -88,7 +86,7 @@ public class InputControlPanelFragment extends Fragment {
             request_body.accumulate("control", "sign_cognize_request");
             JSONObject data = new JSONObject();
             data.accumulate("armband_id", armband_id);
-            data.accumulate("request_id", sign_id);
+            data.accumulate("sign_id", sign_id);
             request_body.accumulate("data", data);
         } catch (Exception ee) {
             Log.e(TAG, "buildSignRecognizeRequest: on build request json " + ee);

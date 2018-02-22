@@ -1,6 +1,7 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Message;
 
 import android.os.Handler;
@@ -89,10 +90,11 @@ public class SocketConnectionManager {
     }
 
     public void startConnection(Armband target_armband,
-                                TaskCompleteCallback callbackListener) {
+                                TaskCompleteCallback callbackListener,
+                                Context context) {
         // 这里调连接线程 进行socket连接
         Log.d(TAG, "startConnection: 连接手环： " + target_armband + "中。。");
-        socket_communicator = new SocketCommunicatorThread(main_thread_handler);
+        socket_communicator = new SocketCommunicatorThread(main_thread_handler, context);
         socket_communicator.start();
         socket_communicator.getLooper();
         listener_list = new ArrayList<>();

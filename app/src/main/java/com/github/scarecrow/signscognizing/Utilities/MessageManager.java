@@ -69,12 +69,13 @@ public class MessageManager {
      * @param sign_id       手语的id码 来自服务器给定
      * @return 新生成的手语消息对象
      */
-    public void updateSignMessage(String text, int sign_id) {
+    public void updateSignMessage(String text, int sign_id, int capture_id) {
         SignMessage new_msg;
         if (sign_message_map.containsKey(sign_id)) {
             new_msg = sign_message_map.get(sign_id);
             new_msg.setTextContent(text);
         } else {
+            new_added_msg.setCaptureId(capture_id);
             new_added_msg.setTextContent(text);
             new_added_msg.setMsgId(sign_id);
             sign_message_map.put(sign_id, new_added_msg);
@@ -86,7 +87,8 @@ public class MessageManager {
         try {
             JSONObject jsonObject = new JSONObject(feedback_json);
             updateSignMessage(jsonObject.getString("text"),
-                    jsonObject.getInt("sign_id"));
+                    jsonObject.getInt("sign_id"),
+                    jsonObject.getInt("capture_id"));
         } catch (Exception ee) {
             Log.e(TAG, "buildSignMessage:  error: " + ee);
             ee.printStackTrace();

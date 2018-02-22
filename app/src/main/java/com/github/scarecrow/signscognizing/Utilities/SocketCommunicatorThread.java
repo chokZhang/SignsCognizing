@@ -1,10 +1,12 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -43,14 +45,16 @@ public class SocketCommunicatorThread extends HandlerThread {
     private int port;
 
     private Socket client_sock;
+    private Context context;
 
     private Thread listener_thread;
 
     private String HOST_IP = "192.168.0.102";
 
-    public SocketCommunicatorThread(Handler main_thread_handler) {
+    public SocketCommunicatorThread(Handler main_thread_handler, Context context) {
         super(TAG);
         this.main_thread_handler = main_thread_handler;
+        this.context = context;
     }
 
     public void startConnection() {
@@ -76,6 +80,7 @@ public class SocketCommunicatorThread extends HandlerThread {
                 .obtainMessage(SocketConnectionManager.TASK_SEND_INFO, request_body.toString())
                 .sendToTarget();
         listener_thread.interrupt();
+        this.context = null;
         try {
             if (!client_sock.isClosed()) {
                 client_sock.getOutputStream().close();
@@ -231,6 +236,8 @@ public class SocketCommunicatorThread extends HandlerThread {
                     }
                 }
             } catch (Exception ee) {
+                Toast.makeText(context, "网络连接错误", Toast.LENGTH_SHORT)
+                        .show();
                 Log.e(TAG, "run: in receive text " + ee);
             }
 

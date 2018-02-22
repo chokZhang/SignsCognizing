@@ -13,6 +13,8 @@ public class SignMessage extends ConversationMessage {
 
     private int sign_feedback_stauts;
 
+    private int capture_id = 0;
+
     private Armband capture_armband;
 
     public SignMessage(String text, int msg_id, Armband capture_armband) {
@@ -28,6 +30,14 @@ public class SignMessage extends ConversationMessage {
 
     public int getSignFeedbackStatus() {
         return sign_feedback_stauts;
+    }
+
+    public void setCaptureId(int capture_id) {
+        this.capture_id = capture_id;
+    }
+
+    public int getCaptureId() {
+        return capture_id;
     }
 
 }
