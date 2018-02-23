@@ -39,6 +39,11 @@ public class InputControlPanelFragment extends Fragment {
                 false);
     }
 
+
+    private boolean capture_state = false;
+    // false -> 没有采集
+    // true  -> 采集中
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -56,17 +61,51 @@ public class InputControlPanelFragment extends Fragment {
             }
         });
 
+
         //手语输入
-        bt = view.findViewById(R.id.button_input_panel_sign_start);
-        bt.setOnClickListener(new View.OnClickListener() {
+        final Button bt_cap = view.findViewById(R.id.button_input_panel_sign_start);
+        bt_cap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SocketConnectionManager.getInstance()
-                        .sendMessage(buildSignRecognizeRequest(0));
-                MessageManager.getInstance()
-                        .buildSignMessage();
+                if (!capture_state) {
+                    SocketConnectionManager.getInstance()
+                            .sendMessage(buildSignRecognizeRequest(0));
+                    MessageManager.getInstance()
+                            .buildSignMessage();
+                    bt_cap.setText("结束手语采集");
+                    capture_state = true;
+                } else {
+                    SocketConnectionManager.getInstance()
+                            .sendMessage(buildStopCaptureRequest());
+                    bt_cap.setText("手语采集");
+                    capture_state = false;
+                }
             }
         });
+        MessageManager.getInstance()
+                .addNewNoticeTarget(new MessageManager.NoticeMessageChanged() {
+                    @Override
+                    public void onNewMessageAdd() {
+                    }
+
+                    @Override
+                    public void onMessageContentChange() {
+                    }
+
+                    @Override
+                    public void onSignCaptureEnd() {
+                        capture_state = false;
+                        bt_cap.setText("手语采集");
+                    }
+
+                    @Override
+                    public void onSignCaptureStart() {
+                        capture_state = true;
+                        bt_cap.setText("结束手语采集");
+                    }
+                });
+
+
 
         //语音输入
     }
@@ -95,12 +134,26 @@ public class InputControlPanelFragment extends Fragment {
         return request_body.toString();
     }
 
+    private String buildStopCaptureRequest() {
+        JSONObject request_body = new JSONObject();
+        try {
+            request_body.accumulate("control", "stop_recognize");
+            request_body.accumulate("data", "");
+        } catch (Exception ee) {
+            Log.e(TAG, "buildStopCaptureRequest: ", ee);
+            ee.printStackTrace();
+        }
+        return request_body.toString();
+    }
+
     @Override
     public void onStop() {
         View view = getView();
-        VoiceRecordButton voiceRecordButton = (VoiceRecordButton)
-                view.findViewById(R.id.button_input_panel_voice_start);
-        voiceRecordButton.releaseMediaResource();
+        if (view != null) {
+            VoiceRecordButton voiceRecordButton =
+                    view.findViewById(R.id.button_input_panel_voice_start);
+            voiceRecordButton.releaseMediaResource();
+        }
         super.onStop();
     }
 }

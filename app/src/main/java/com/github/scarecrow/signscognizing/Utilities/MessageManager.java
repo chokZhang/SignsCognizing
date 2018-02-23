@@ -1,6 +1,9 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
+import android.icu.util.ICUUncheckedIOException;
 import android.util.Log;
+
+import com.github.scarecrow.signscognizing.fragments.InputControlPanelFragment;
 
 import org.json.JSONObject;
 
@@ -59,6 +62,20 @@ public class MessageManager {
         noticeAllTargetMsgAdded();
     }
 
+    public TextMessage buildTextMessage(String text) {
+        TextMessage new_msg = new TextMessage(acquire_curr_id(), text);
+        messages_list.add(new_msg);
+        noticeAllTargetMsgAdded();
+        return new_msg;
+    }
+
+    public VoiceMessage buildVoiceMessage(String voice_path) {
+        VoiceMessage new_msg = new VoiceMessage(acquire_curr_id(), voice_path);
+        messages_list.add(new_msg);
+        noticeAllTargetMsgAdded();
+        return new_msg;
+    }
+
 
     /**
      * 当返回一条手语识别的消息调用后 更新一个手语消息的实例
@@ -86,27 +103,33 @@ public class MessageManager {
     public void updateSignMessage(String feedback_json) {
         try {
             JSONObject jsonObject = new JSONObject(feedback_json);
-            updateSignMessage(jsonObject.getString("text"),
-                    jsonObject.getInt("sign_id"),
-                    jsonObject.getInt("capture_id"));
+            String control_info = jsonObject.getString("control");
+            if (control_info.equals("update_recognize_res")) {
+                updateSignMessage(jsonObject.getString("text"),
+                        jsonObject.getInt("sign_id"),
+                        jsonObject.getInt("capture_id"));
+
+            } else if (control_info.equals("end_recognize")) {
+                int sign_id = jsonObject.getInt("sign_id");
+                if (sign_message_map.containsKey(sign_id)) {
+                    sign_message_map.get(sign_id).setCaptureComplete(true);
+                    noticeAllTargetSignCaptureEnd();
+                    noticeAllTargetMsgChange();
+                }
+            }
         } catch (Exception ee) {
             Log.e(TAG, "buildSignMessage:  error: " + ee);
             ee.printStackTrace();
         }
     }
 
-    public TextMessage buildTextMessage(String text) {
-        TextMessage new_msg = new TextMessage(acquire_curr_id(), text);
-        messages_list.add(new_msg);
-        noticeAllTargetMsgAdded();
-        return new_msg;
-    }
+    public void recaptureSignRequest(SignMessage message) {
+        message.setCaptureComplete(false);
+        noticeAllTargetMsgSignCaptureStart();
+        SocketConnectionManager.getInstance()
+                .sendMessage(InputControlPanelFragment
+                        .buildSignRecognizeRequest(message.getMsgId()));
 
-    public VoiceMessage buildVoiceMessage(String voice_path) {
-        VoiceMessage new_msg = new VoiceMessage(acquire_curr_id(), voice_path);
-        messages_list.add(new_msg);
-        noticeAllTargetMsgAdded();
-        return new_msg;
     }
 
 
@@ -116,6 +139,12 @@ public class MessageManager {
 
     public void addNewNoticeTarget(NoticeMessageChanged obj) {
         notice_list.add(obj);
+    }
+
+    private void noticeAllTargetSignCaptureEnd() {
+        for (NoticeMessageChanged obj : notice_list) {
+            obj.onSignCaptureEnd();
+        }
     }
 
     private void noticeAllTargetMsgAdded() {
@@ -130,9 +159,18 @@ public class MessageManager {
         }
     }
 
+    private void noticeAllTargetMsgSignCaptureStart() {
+        for (NoticeMessageChanged obj : notice_list) {
+            obj.onSignCaptureStart();
+        }
+    }
+
     public interface NoticeMessageChanged {
         void onNewMessageAdd();
-
         void onMessageContentChange();
+
+        void onSignCaptureStart();
+
+        void onSignCaptureEnd();
     }
 }

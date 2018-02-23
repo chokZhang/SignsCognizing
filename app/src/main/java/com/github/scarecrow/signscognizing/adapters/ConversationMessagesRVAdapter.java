@@ -118,6 +118,7 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
         holder.send_msg_view.setVisibility(View.GONE);
         holder.receive_msg_view.setVisibility(View.GONE);
         holder.sign_recapture_dialog.setVisibility(View.GONE);
+        holder.sign_confirm_dialog.setVisibility(View.GONE);
         int init_blue_color_value = 0xFF3F51B5;
         holder.sign_confirm_yes_button.setTextColor(init_blue_color_value);
         holder.sign_confirm_no_button.setTextColor(init_blue_color_value);
@@ -141,26 +142,28 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
         switch (message.getSignFeedbackStatus()) {
             case SignMessage.INITIAL:
                 holder.receive_msg_view.setVisibility(View.VISIBLE);
-                holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
                 holder.receive_msg_content.setText(message.getTextContent());
-                holder.sign_confirm_yes_button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        holder.sign_confirm_yes_button.setTextColor(Color.GRAY);
-                        message.setSignFeedbackStatus(SignMessage.CONFIRMED_CORRECT);
-                        //todo 根据capture_id反馈正确
-                        setHolderViewByMsgState(holder, message);
-                    }
-                });
+                if (message.isCaptureComplete()) {
+                    holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
+                    holder.sign_confirm_yes_button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            holder.sign_confirm_yes_button.setTextColor(Color.GRAY);
+                            message.setSignFeedbackStatus(SignMessage.CONFIRMED_CORRECT);
+                            //todo 根据capture_id反馈正确
+                            setHolderViewByMsgState(holder, message);
+                        }
+                    });
 
-                holder.sign_confirm_no_button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        message.setSignFeedbackStatus(SignMessage.CONFIRMED_WRONG);
-                        setHolderViewByMsgState(holder, message);
+                    holder.sign_confirm_no_button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            message.setSignFeedbackStatus(SignMessage.CONFIRMED_WRONG);
+                            setHolderViewByMsgState(holder, message);
 
-                    }
-                });
+                        }
+                    });
+                }
                 break;
             case SignMessage.CONFIRMED_CORRECT:
                 holder.receive_msg_view.setVisibility(View.VISIBLE);
@@ -208,9 +211,8 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
     }
 
     private void recaptureRequest(SignMessage msg) {
-        SocketConnectionManager.getInstance()
-                .sendMessage(InputControlPanelFragment
-                        .buildSignRecognizeRequest(msg.getMsgId()));
+        MessageManager.getInstance()
+                .recaptureSignRequest(msg);
     }
 
     @Override

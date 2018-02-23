@@ -15,6 +15,8 @@ public class SignMessage extends ConversationMessage {
 
     private int capture_id = 0;
 
+    private boolean is_capture_complete = false;
+
     private Armband capture_armband;
 
     public SignMessage(String text, int msg_id, Armband capture_armband) {
@@ -38,6 +40,14 @@ public class SignMessage extends ConversationMessage {
 
     public int getCaptureId() {
         return capture_id;
+    }
+
+    public void setCaptureComplete(boolean status) {
+        is_capture_complete = status;
+    }
+
+    public boolean isCaptureComplete() {
+        return is_capture_complete;
     }
 
 }

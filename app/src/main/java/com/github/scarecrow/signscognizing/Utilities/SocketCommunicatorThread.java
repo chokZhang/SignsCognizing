@@ -45,16 +45,14 @@ public class SocketCommunicatorThread extends HandlerThread {
     private int port;
 
     private Socket client_sock;
-    private Context context;
 
     private Thread listener_thread;
 
     private String HOST_IP = "192.168.0.102";
 
-    public SocketCommunicatorThread(Handler main_thread_handler, Context context) {
+    public SocketCommunicatorThread(Handler main_thread_handler) {
         super(TAG);
         this.main_thread_handler = main_thread_handler;
-        this.context = context;
     }
 
     public void startConnection() {
@@ -80,7 +78,6 @@ public class SocketCommunicatorThread extends HandlerThread {
                 .obtainMessage(SocketConnectionManager.TASK_SEND_INFO, request_body.toString())
                 .sendToTarget();
         listener_thread.interrupt();
-        this.context = null;
         try {
             if (!client_sock.isClosed()) {
                 client_sock.getOutputStream().close();
@@ -219,14 +216,12 @@ public class SocketCommunicatorThread extends HandlerThread {
                 while (!Thread.currentThread().isInterrupted()) {
                     inputStream.read(buffer);
                     if (buffer[0] != '\0') {
-                        System.out.println("socket stream: " + new String(buffer));
                         StringBuilder stringBuilder = new StringBuilder();
                         stringBuilder.append(new String(buffer));
                         inputStream.read(buffer);
                         //如果没有到达结尾
                         while ((buffer[0] != '$')) {
                             stringBuilder.append(new String(buffer));
-                            System.out.println(new String(buffer));
                             inputStream.read(buffer);
                         }
                         callback_thread
@@ -236,9 +231,10 @@ public class SocketCommunicatorThread extends HandlerThread {
                     }
                 }
             } catch (Exception ee) {
-                Toast.makeText(context, "网络连接错误", Toast.LENGTH_SHORT)
-                        .show();
                 Log.e(TAG, "run: in receive text " + ee);
+                callback_thread
+                        .obtainMessage(SocketConnectionManager.DISCONNECT)
+                        .sendToTarget();
             }
 
 

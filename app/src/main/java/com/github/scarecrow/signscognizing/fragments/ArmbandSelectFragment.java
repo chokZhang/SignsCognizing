@@ -108,9 +108,12 @@ public class ArmbandSelectFragment extends Fragment {
 
                             @Override
                             public void onDisconnect() {
-
+//                                Toast.makeText(getContext(),"与服务器断开连接",Toast.LENGTH_SHORT)
+//                                        .show();
+//                                ((MainActivity) getActivity()).switchFragment(MainActivity.FRAGMENT_ARMBANDS_SELECT);
+//                                ((MainActivity) getActivity()).switchFragment(MainActivity.FRAGMENT_INFO_DISPLAY);
                             }
-                        }, getContext());
+                        });
             }
         });
         armbands_rv.setAdapter(adapter);

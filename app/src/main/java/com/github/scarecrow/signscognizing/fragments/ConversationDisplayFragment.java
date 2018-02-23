@@ -56,6 +56,17 @@ public class ConversationDisplayFragment extends Fragment {
                 adapter.updateMessageList();
                 adapter.notifyDataSetChanged();
             }
+
+            @Override
+            public void onSignCaptureEnd() {
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onSignCaptureStart() {
+                adapter.notifyDataSetChanged();
+            }
+
         });
         //发送消息按钮
         Button bt = view.findViewById(R.id.button_text_send);
