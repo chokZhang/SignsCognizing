@@ -37,6 +37,8 @@ public class SocketCommunicatorThread extends HandlerThread {
 
     private static final MediaType MEDIA_TYPE_JSON
             = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
+    private static final String HOST_IP = "192.168.0.102";
+
     private static String TAG = "SocketCommunicator";
 
     private Handler main_thread_handler,
@@ -48,7 +50,7 @@ public class SocketCommunicatorThread extends HandlerThread {
 
     private Thread listener_thread;
 
-    private String HOST_IP = "192.168.0.102";
+
 
     public SocketCommunicatorThread(Handler main_thread_handler) {
         super(TAG);
@@ -115,6 +117,29 @@ public class SocketCommunicatorThread extends HandlerThread {
     }
 
 
+    private void buildUpSocketConnection() {
+        try {
+            //这里进行套接字的连接建立工作
+            port = getTargetPort();
+            client_sock = new Socket(HOST_IP, port);
+
+            // 再开一个线程专门用来监听 它收到消息了就就先缓存着 直到消息结尾
+            // 然后将整个消息返回给主线程 然后再返回等待状态
+            listener_thread = new Thread(new ListenerLoop
+                    (client_sock, main_thread_handler));
+            listener_thread.start();
+
+        } catch (Exception ee) {
+            main_thread_handler.obtainMessage(SocketConnectionManager.CONNECT_FAILED)
+                    .sendToTarget();
+            Log.e(TAG, "handleMessage: onEstablish connection : " + ee);
+            ee.printStackTrace();
+            return;
+        }
+        main_thread_handler.obtainMessage(SocketConnectionManager.CONNECT_SUCCESS)
+                .sendToTarget();
+    }
+
     /**
      * 向服务器发起一个post请求 告知服务器占用手环同时开启套接字接口
      *
@@ -129,7 +154,7 @@ public class SocketCommunicatorThread extends HandlerThread {
                 armband_id = ArmbandManager.getArmbandsManger()
                         .getCurrentConnectedArmband()
                         .getArmband_id();
-        // todo 这里为双手手环做准备
+        // todo 这里为双手手环做准备 上传的参数是一个list
         JSONObject json_param = new JSONObject();
         JSONArray jsonArray = new JSONArray();
         jsonArray.put(armband_id);
@@ -154,28 +179,6 @@ public class SocketCommunicatorThread extends HandlerThread {
         }
     }
 
-    private void buildUpSocketConnection() {
-        try {
-            //这里进行套接字的连接建立工作
-            port = getTargetPort();
-            client_sock = new Socket(HOST_IP, port);
-
-            // 再开一个线程专门用来监听 它收到消息了就就先缓存着 直到消息结尾
-            // 然后将整个消息返回给主线程 然后再返回等待状态
-            listener_thread = new Thread(new ListenerLoop
-                    (client_sock, main_thread_handler));
-            listener_thread.start();
-
-        } catch (Exception ee) {
-            main_thread_handler.obtainMessage(SocketConnectionManager.CONNECT_FAILED)
-                    .sendToTarget();
-            Log.e(TAG, "handleMessage: onEstablish connection : " + ee);
-            ee.printStackTrace();
-            return;
-        }
-        main_thread_handler.obtainMessage(SocketConnectionManager.CONNECT_SUCCESS)
-                .sendToTarget();
-    }
 
     private void socketSend(String info) {
         Log.d(TAG, "handleMessage: seed info : " + info);

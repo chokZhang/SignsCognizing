@@ -1,10 +1,17 @@
 package com.github.scarecrow.signscognizing.adapters;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Color;
 
+import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
 import com.github.scarecrow.signscognizing.fragments.InputControlPanelFragment;
 import com.iflytek.cloud.SpeechRecognizer;
+
+import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.ConversationMessage;
@@ -20,8 +28,17 @@ import com.github.scarecrow.signscognizing.Utilities.SignMessage;
 import com.github.scarecrow.signscognizing.Utilities.TextMessage;
 import com.github.scarecrow.signscognizing.Utilities.VoiceMessage;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.InputStreamReader;
 import java.util.List;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import static android.content.ContentValues.TAG;
 
@@ -31,9 +48,16 @@ import static android.content.ContentValues.TAG;
 
 public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<ConversationMessagesRVAdapter.MessagesItemViewHolder> {
 
+
+    private static final MediaType MEDIA_TYPE_JSON
+            = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
+
     private List<ConversationMessage> messages_list;
 
-    public ConversationMessagesRVAdapter() {
+    private Context context;
+
+    public ConversationMessagesRVAdapter(Context context) {
+        this.context = context;
         updateMessageList();
     }
 
@@ -150,7 +174,7 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
                         public void onClick(View v) {
                             holder.sign_confirm_yes_button.setTextColor(Color.GRAY);
                             message.setSignFeedbackStatus(SignMessage.CONFIRMED_CORRECT);
-                            //todo 根据capture_id反馈正确
+                            recognizeResultFeedback(message, true);
                             setHolderViewByMsgState(holder, message);
                         }
                     });
@@ -159,8 +183,8 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
                         @Override
                         public void onClick(View view) {
                             message.setSignFeedbackStatus(SignMessage.CONFIRMED_WRONG);
+                            recognizeResultFeedback(message, false);
                             setHolderViewByMsgState(holder, message);
-
                         }
                     });
                 }
@@ -182,9 +206,13 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
                     @Override
                     public void onClick(View v) {
                         Log.d(TAG, "onClick: 手语re采集 回调");
+                        if (!recaptureRequest(message)) {
+                            Toast.makeText(context, " 已经有一条消息在进行手语采集了，请勿重复", Toast.LENGTH_SHORT)
+                                    .show();
+                            return;
+                        }
                         holder.sign_recapture_yes_button.setTextColor(Color.GRAY);
                         message.setSignFeedbackStatus(SignMessage.INITIAL);
-                        recaptureRequest(message);
                         setHolderViewByMsgState(holder, message);
 
                     }
@@ -210,14 +238,61 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
         }
     }
 
-    private void recaptureRequest(SignMessage msg) {
-        MessageManager.getInstance()
+    private boolean recaptureRequest(SignMessage msg) {
+        return MessageManager.getInstance()
                 .recaptureSignRequest(msg);
     }
 
+    private void recognizeResultFeedback(final SignMessage msg, final boolean correctness) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                OkHttpClient okHttpClient = new OkHttpClient();
+
+                String capture_id = String.valueOf(msg.getCaptureId()),
+                        correctness_str = correctness ? "True" : "False";
+
+                String content = "?" + "capture_id=" + capture_id
+                        + "&correctness=" + correctness_str;
+
+                RequestBody requestBody = RequestBody
+                        .create(MEDIA_TYPE_JSON, content);
+                Request request = new Request.Builder()
+                        .url(ArmbandManager.SERVER_IP_ADDRESS + "/capture_feedback/")
+                        .post(requestBody)
+                        .build();
+                Log.d(TAG, "recognizeResultFeedback: seed feedback: " + content);
+                try {
+                    Response response = okHttpClient.newCall(request).execute();
+                    if (response.isSuccessful()) {
+                        main_thread_handler.obtainMessage()
+                                .sendToTarget();
+                    }
+                } catch (Exception ee) {
+                    ee.printStackTrace();
+                    Log.e(TAG, "send feedback error");
+                }
+            }
+        }).start();
+    }
+
+    @SuppressLint("HandlerLeak")
+    private Handler main_thread_handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            Toast.makeText(context, "识别结果反馈成功", Toast.LENGTH_SHORT)
+                    .show();
+        }
+    };
+
     @Override
     public int getItemCount() {
-
         return messages_list.size();
+    }
+
+    public void onDestroy() {
+        context = null;
+        main_thread_handler.removeCallbacksAndMessages(null);
     }
 }

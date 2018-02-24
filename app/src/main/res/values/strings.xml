@@ -5,13 +5,13 @@
     <string name="关于">关于</string>
     <string name="选择手环">选择手环</string>
     <string name="返回">返回</string>
-    <string name="手语识别">手语识别</string>
+    <string name="手语识别">开始手语识别</string>
     <string name="结束识别">结束识别</string>
     <string name="语音输入">语音输入</string>
     <string name="刷新">刷新</string>
     <string name="点击手环进行连接">请点击下面列表中手环进行连接</string>
-    <string name="输入手语">输入手语</string>
-    <string name="输入语音">输入语音</string>
+    <string name="输入手语">开始手语采集</string>
+    <string name="输入语音">长按录入语音</string>
     <string name="发送">发送</string>
     <string name="text_edit_hint">请在这里输入想要发送的信息</string>
     <string name="hint_sign_confirm">以上手语是否正确?</string>

@@ -40,16 +40,13 @@ public class InputControlPanelFragment extends Fragment {
     }
 
 
-    private boolean capture_state = false;
-    // false -> 没有采集
-    // true  -> 采集中
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         View view = getView();
         //返回button
-        Button bt = view.findViewById(R.id.button_input_panel_back);
+        final Button bt = view.findViewById(R.id.button_input_panel_back);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -67,18 +64,17 @@ public class InputControlPanelFragment extends Fragment {
         bt_cap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                boolean capture_state = MessageManager.getInstance()
+                        .isCapturingSign();
                 if (!capture_state) {
-                    SocketConnectionManager.getInstance()
-                            .sendMessage(buildSignRecognizeRequest(0));
                     MessageManager.getInstance()
-                            .buildSignMessage();
+                            .requestCaptureSign();
                     bt_cap.setText("结束手语采集");
-                    capture_state = true;
+
                 } else {
                     SocketConnectionManager.getInstance()
                             .sendMessage(buildStopCaptureRequest());
                     bt_cap.setText("手语采集");
-                    capture_state = false;
                 }
             }
         });
@@ -94,13 +90,11 @@ public class InputControlPanelFragment extends Fragment {
 
                     @Override
                     public void onSignCaptureEnd() {
-                        capture_state = false;
-                        bt_cap.setText("手语采集");
+                        bt_cap.setText("开始手语采集");
                     }
 
                     @Override
                     public void onSignCaptureStart() {
-                        capture_state = true;
                         bt_cap.setText("结束手语采集");
                     }
                 });
@@ -108,30 +102,6 @@ public class InputControlPanelFragment extends Fragment {
 
 
         //语音输入
-    }
-
-    /**
-     * 手语识别请求体构造
-     * 如果是新增识别， 的 sign_id字段使用0 标识
-     *  如："data": {"sign_id" :0}
-     * @return 请求的json
-     */
-    public static String buildSignRecognizeRequest(int sign_id) {
-        String armband_id = ArmbandManager.getArmbandsManger()
-                .getCurrentConnectedArmband()
-                .getArmband_id();
-        JSONObject request_body = new JSONObject();
-        try {
-            request_body.accumulate("control", "sign_cognize_request");
-            JSONObject data = new JSONObject();
-            data.accumulate("armband_id", armband_id);
-            data.accumulate("sign_id", sign_id);
-            request_body.accumulate("data", data);
-        } catch (Exception ee) {
-            Log.e(TAG, "buildSignRecognizeRequest: on build request json " + ee);
-            ee.printStackTrace();
-        }
-        return request_body.toString();
     }
 
     private String buildStopCaptureRequest() {

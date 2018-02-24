@@ -36,7 +36,10 @@ public class MessageManager {
 
     private Map<Integer, SignMessage> sign_message_map = new Hashtable<>();
 
-    private int sign_id;
+    private boolean capture_state = false;
+    // false -> 没有采集
+    // true  -> 采集中
+
 
     public static MessageManager getInstance() {
         return instance;
@@ -123,15 +126,61 @@ public class MessageManager {
         }
     }
 
-    public void recaptureSignRequest(SignMessage message) {
+    public boolean requestCaptureSign() {
+        if (capture_state) {
+            Log.e(TAG, "requestCaptureSign: sign capturing repeat");
+            return false;
+        }
+        capture_state = true;
+        SocketConnectionManager.getInstance()
+                .sendMessage(buildSignRecognizeRequest(0));
+        MessageManager.getInstance()
+                .buildSignMessage();
+        return true;
+    }
+
+    public boolean recaptureSignRequest(SignMessage message) {
+        if (capture_state) {
+            Log.e(TAG, "requestCaptureSign: sign capturing repeat");
+            return false;
+        }
+        capture_state = true;
         message.setCaptureComplete(false);
         noticeAllTargetMsgSignCaptureStart();
         SocketConnectionManager.getInstance()
-                .sendMessage(InputControlPanelFragment
-                        .buildSignRecognizeRequest(message.getMsgId()));
-
+                .sendMessage(buildSignRecognizeRequest(message.getMsgId()));
+        return true;
     }
 
+    /**
+     * 手语识别请求体构造
+     * 如果是新增识别， 的 sign_id字段使用0 标识
+     * 如："data": {"sign_id" :0}
+     *
+     * @return 请求的json
+     */
+    public String buildSignRecognizeRequest(int sign_id) {
+        String armband_id = ArmbandManager.getArmbandsManger()
+                .getCurrentConnectedArmband()
+                .getArmband_id();
+        JSONObject request_body = new JSONObject();
+        try {
+            request_body.accumulate("control", "sign_cognize_request");
+            JSONObject data = new JSONObject();
+            data.accumulate("armband_id", armband_id);
+            data.accumulate("sign_id", sign_id);
+            request_body.accumulate("data", data);
+        } catch (Exception ee) {
+            Log.e(TAG, "buildSignRecognizeRequest: on build request json " + ee);
+            ee.printStackTrace();
+        }
+        return request_body.toString();
+    }
+
+
+    public boolean isCapturingSign() {
+        return capture_state;
+    }
 
     public List<ConversationMessage> getMessagesList() {
         return messages_list;
@@ -142,6 +191,7 @@ public class MessageManager {
     }
 
     private void noticeAllTargetSignCaptureEnd() {
+        capture_state = false;
         for (NoticeMessageChanged obj : notice_list) {
             obj.onSignCaptureEnd();
         }

@@ -12,7 +12,6 @@ import android.widget.EditText;
 
 import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.MessageManager;
-import com.github.scarecrow.signscognizing.Utilities.TextMessage;
 import com.github.scarecrow.signscognizing.adapters.ConversationMessagesRVAdapter;
 
 /**
@@ -35,36 +34,39 @@ public class ConversationDisplayFragment extends Fragment {
                 false);
     }
 
+
+    private ConversationMessagesRVAdapter conversation_rv_adapter;
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         View view = getView();
         final RecyclerView recyclerView = view.findViewById(R.id.conversation_display_rv);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        final ConversationMessagesRVAdapter adapter = new ConversationMessagesRVAdapter();
-        recyclerView.setAdapter(adapter);
+        conversation_rv_adapter = new ConversationMessagesRVAdapter(getContext());
+        recyclerView.setAdapter(conversation_rv_adapter);
+
         MessageManager.getInstance().addNewNoticeTarget(new MessageManager.NoticeMessageChanged() {
             @Override
             public void onNewMessageAdd() {
-                adapter.updateMessageList();
-                adapter.notifyDataSetChanged();
-                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                conversation_rv_adapter.updateMessageList();
+                conversation_rv_adapter.notifyDataSetChanged();
+                recyclerView.scrollToPosition(conversation_rv_adapter.getItemCount() - 1);
             }
 
             @Override
             public void onMessageContentChange() {
-                adapter.updateMessageList();
-                adapter.notifyDataSetChanged();
+                conversation_rv_adapter.updateMessageList();
+                conversation_rv_adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onSignCaptureEnd() {
-                adapter.notifyDataSetChanged();
+                conversation_rv_adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onSignCaptureStart() {
-                adapter.notifyDataSetChanged();
+                conversation_rv_adapter.notifyDataSetChanged();
             }
 
         });
@@ -80,6 +82,14 @@ public class ConversationDisplayFragment extends Fragment {
             }
         });
 
+    }
+
+
+    //    在fragment不可见的时候 清除handler里面的东西 避免fragment内存泄漏
+    @Override
+    public void onStop() {
+        conversation_rv_adapter.onDestroy();
+        super.onStop();
     }
 
 }

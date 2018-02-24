@@ -8,7 +8,7 @@ import static android.content.ContentValues.TAG;
 
 /**
  * Created by Scarecrow on 2018/2/6.
- * 手环对象 从服务器拉取
+ * 手环对象 数据从服务器拉取
  */
 
 public class Armband {
@@ -53,12 +53,12 @@ public class Armband {
     public String toString() {
         String str, armband_status_str;
         if (armband_status == ARMBAND_OCCURPIED)
-            armband_status_str = "armband occupied";
+            armband_status_str = "手环已被其他终端使用";
         else
-            armband_status_str = "armband ready to connect";
+            armband_status_str = "手环就绪，准备接受连接";
 
-        str = "armband_id:\n   " + armband_id
-                + "\narmband_status:\n   " + armband_status_str;
+        str = "手环ID:\n   " + armband_id
+                + "\n手环当前状态:\n   " + armband_status_str;
         return str;
     }
 }
