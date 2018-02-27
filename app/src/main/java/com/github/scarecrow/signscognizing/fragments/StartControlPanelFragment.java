@@ -48,5 +48,15 @@ public class StartControlPanelFragment extends Fragment {
             }
         });
 
+        bt = fragment_view.findViewById(R.id.setting_button);
+        bt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                parent_activity.switchFragment(MainActivity.FRAGMENT_SETTING);
+            }
+        });
+
+
+
     }
 }

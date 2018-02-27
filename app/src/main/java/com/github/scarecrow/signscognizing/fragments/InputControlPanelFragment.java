@@ -2,23 +2,16 @@ package com.github.scarecrow.signscognizing.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.github.scarecrow.signscognizing.R;
-import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.Utilities.MessageManager;
 import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
 import com.github.scarecrow.signscognizing.activities.MainActivity;
 import com.github.scarecrow.signscognizing.adapters.VoiceRecordButton;
-
-import org.json.JSONObject;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by Scarecrow on 2018/2/
@@ -67,14 +60,16 @@ public class InputControlPanelFragment extends Fragment {
                 boolean capture_state = MessageManager.getInstance()
                         .isCapturingSign();
                 if (!capture_state) {
-                    MessageManager.getInstance()
+                    boolean res = MessageManager.getInstance()
                             .requestCaptureSign();
-                    bt_cap.setText("结束手语采集");
+                    if (res)
+                        bt_cap.setText("结束手语采集");
 
                 } else {
-                    SocketConnectionManager.getInstance()
-                            .sendMessage(buildStopCaptureRequest());
-                    bt_cap.setText("手语采集");
+                    boolean res = MessageManager.getInstance()
+                            .stopSignRecognize();
+                    if (res)
+                        bt_cap.setText("开始手语采集");
                 }
             }
         });
@@ -104,17 +99,6 @@ public class InputControlPanelFragment extends Fragment {
         //语音输入
     }
 
-    private String buildStopCaptureRequest() {
-        JSONObject request_body = new JSONObject();
-        try {
-            request_body.accumulate("control", "stop_recognize");
-            request_body.accumulate("data", "");
-        } catch (Exception ee) {
-            Log.e(TAG, "buildStopCaptureRequest: ", ee);
-            ee.printStackTrace();
-        }
-        return request_body.toString();
-    }
 
     @Override
     public void onStop() {

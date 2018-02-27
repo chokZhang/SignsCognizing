@@ -20,6 +20,9 @@ import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.adapters.ArmbandListRecyclerViewAdapter;
 
+import java.util.List;
+import java.util.Map;
+
 import static android.content.ContentValues.TAG;
 
 /**
@@ -38,6 +41,12 @@ public class ArmbandSelectFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        adapter.init_state();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
         View view = inflater.inflate(R.layout.fragment_armband_select, container,
@@ -47,85 +56,121 @@ public class ArmbandSelectFragment extends Fragment {
         return view;
     }
 
+
+    final ArmbandListRecyclerViewAdapter adapter = new ArmbandListRecyclerViewAdapter();
     @Override
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
 
-        Button bt = fragment_view.findViewById(R.id.button_armband_select_return);
-        final MainActivity parent_activity = (MainActivity)getActivity();
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        final RecyclerView armbands_rv = fragment_view.findViewById(R.id.armbands_list_rv);
+        armbands_rv.setLayoutManager(linearLayoutManager);
+
+
+        ArmbandManager.getArmbandsManger()
+                .setOnUpdateCompleteCallback(new ArmbandManager.OnUpdateComplete() {
+                    @Override
+                    public void noticeUpdateComplete(List<Armband> armbandList) {
+                        adapter.setArmbandList(armbandList);
+                    }
+                });
+        ArmbandManager.getArmbandsManger().updateArmbandsList();
+
+        boolean pair_mode = ArmbandManager.getArmbandsManger().getArmbandPairMode();
+//         单手模式时 点击列表中item即可开始匹配
+        if (!pair_mode) {
+            adapter.setOnListItemClickListenner(new ListItemClickListenner() {
+                @Override
+                public void onListItemClick(Armband item) {
+                    ArmbandManager.getArmbandsManger()
+                            .setCurrentConnectedArmband(item);
+                    startArmbandPair();
+                }
+            });
+        } else {
+//        双手模式时设置确定所选手环按钮的监听器
+            Button bt = fragment_view.findViewById(R.id.button_armband_select_confirm);
+            bt.setVisibility(View.VISIBLE);
+            bt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Armband[] selected_armband = adapter.getSelectedArmband();
+                    if (selected_armband == null) {
+                        Toast.makeText(getContext(), "请选择两个手环", Toast.LENGTH_SHORT)
+                                .show();
+                        return;
+                    }
+                    ArmbandManager.getArmbandsManger()
+                            .setCurrentConnectedArmband(selected_armband[0], selected_armband[1]);
+                    startArmbandPair();
+                }
+            });
+        }
+        armbands_rv.setAdapter(adapter);
+
+
+        final MainActivity parent_activity = (MainActivity) getActivity();
+        Button bt = fragment_view.findViewById(R.id.button_armband_select_refresh);
+        bt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ArmbandManager.getArmbandsManger().updateArmbandsList();
+            }
+        });
+
+        bt = fragment_view.findViewById(R.id.button_armband_select_return);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 parent_activity.switchFragment(MainActivity.FRAGMENT_START_CONTROL);
             }
         });
+    }
 
+    private void startArmbandPair() {
+        final ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog.setCancelable(true);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setTitle("连接中");
+        progressDialog.show();
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        final RecyclerView armbands_rv = fragment_view.findViewById(R.id.armbands_list_rv);
-        armbands_rv.setLayoutManager(linearLayoutManager);
-        final ArmbandListRecyclerViewAdapter adapter = new ArmbandListRecyclerViewAdapter(
-                ArmbandManager.getArmbandsManger().getArmbandsList());
+        SocketConnectionManager.getInstance()
+                .startConnection(new SocketConnectionManager.TaskCompleteCallback() {
+                    @Override
+                    public void onConnectSucceeded() {
+                        progressDialog.cancel();
+                        Toast.makeText(getContext(), " 连接成功", Toast.LENGTH_SHORT)
+                                .show();
 
-        adapter.setOnListItemClickListenner(new ListItemClickListenner() {
-            @Override
-            public void onListItemClick(Armband item) {
-                final ProgressDialog progressDialog = new ProgressDialog(getContext());
-                progressDialog.setCancelable(true);
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                progressDialog.setTitle("连接中");
-                progressDialog.show();
+                        ((MainActivity) getActivity())
+                                .switchFragment(MainActivity.FRAGMENT_INPUT_CONTROL);
+                        ((MainActivity) getActivity())
+                                .switchFragment(MainActivity.FRAGMENT_CONVERSATION_DISPLAY);
+                    }
 
-                SocketConnectionManager.getInstance()
-                        .startConnection(item, new SocketConnectionManager.TaskCompleteCallback() {
-                            @Override
-                            public void onConnectSucceeded() {
-                                progressDialog.cancel();
-                                Toast.makeText(getContext(), " 连接成功", Toast.LENGTH_SHORT)
-                                        .show();
+                    @Override
+                    public void onConnectFailed() {
+                        progressDialog.cancel();
+                        Toast.makeText(getContext(), " 连接失败", Toast.LENGTH_SHORT)
+                                .show();
+                    }
 
-                                ((MainActivity) getActivity())
-                                        .switchFragment(MainActivity.FRAGMENT_INPUT_CONTROL);
-                                ((MainActivity) getActivity())
-                                        .switchFragment(MainActivity.FRAGMENT_CONVERSATION_DISPLAY);
-                                //   SocketConnectionManager.getInstance()
-                                //          .sendMessage("hi there, server");
-                            }
-                            @Override
-                            public void onConnectFailed() {
-                                progressDialog.cancel();
-                                Toast.makeText(getContext(), " 连接失败", Toast.LENGTH_SHORT)
-                                        .show();
-                            }
+                    @Override
+                    public void onReceivedMessage(String message) {
+                        Log.d(TAG, "onReceiveMessage: receive message from server: "
+                                + message);
+                        MessageManager.getInstance()
+                                .processSignMessageFeedback(message);
+                    }
 
-                            @Override
-                            public void onReceivedMessage(String message) {
-                                Log.d(TAG, "onReceiveMessage: receive message from server: "
-                                        + message);
-                                MessageManager.getInstance()
-                                        .updateSignMessage(message);
-                            }
-
-                            @Override
-                            public void onDisconnect() {
+                    @Override
+                    public void onDisconnect() {
 //                                Toast.makeText(getContext(),"与服务器断开连接",Toast.LENGTH_SHORT)
 //                                        .show();
 //                                ((MainActivity) getActivity()).switchFragment(MainActivity.FRAGMENT_ARMBANDS_SELECT);
 //                                ((MainActivity) getActivity()).switchFragment(MainActivity.FRAGMENT_INFO_DISPLAY);
-                            }
-                        });
-            }
-        });
-        armbands_rv.setAdapter(adapter);
-
-        bt = fragment_view.findViewById(R.id.button_armband_select_refresh);
-        bt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ArmbandManager.getArmbandsManger().updateArmbandsList();
-                armbands_rv.getAdapter().notifyDataSetChanged();
-            }
-        });
+                    }
+                });
     }
 
     public interface ListItemClickListenner {

@@ -12,6 +12,7 @@ import com.github.scarecrow.signscognizing.fragments.ArmbandSelectFragment;
 import com.github.scarecrow.signscognizing.fragments.ConversationDisplayFragment;
 import com.github.scarecrow.signscognizing.fragments.InfoDisplayFragment;
 import com.github.scarecrow.signscognizing.fragments.InputControlPanelFragment;
+import com.github.scarecrow.signscognizing.fragments.SettingFragment;
 import com.github.scarecrow.signscognizing.fragments.StartControlPanelFragment;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.SpeechRecognizer;
@@ -23,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
                             FRAGMENT_INPUT_CONTROL = 25,
                             FRAGMENT_ARMBANDS_SELECT = 46,
                             FRAGMENT_CONVERSATION_DISPLAY = -289,
-                            FRAGMENT_INFO_DISPLAY = -29;
+            FRAGMENT_INFO_DISPLAY = -29,
+            FRAGMENT_SETTING = 30;
 
 
 
@@ -85,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case FRAGMENT_START_CONTROL:
                 fragment = new StartControlPanelFragment();
+                break;
+            case FRAGMENT_SETTING:
+                fragment = new SettingFragment();
                 break;
             default:
                 fragment = new InfoDisplayFragment();

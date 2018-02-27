@@ -150,14 +150,16 @@ public class SocketCommunicatorThread extends HandlerThread {
 
         OkHttpClient okHttpClient = new OkHttpClient();
 
-        String param_name = "armband_id",
-                armband_id = ArmbandManager.getArmbandsManger()
-                        .getCurrentConnectedArmband()
-                        .getArmband_id();
+        String param_name = "armband_id";
+        Armband[] paired_armbands = ArmbandManager.getArmbandsManger()
+                .getCurrentConnectedArmband();
+
         // todo 这里为双手手环做准备 上传的参数是一个list
         JSONObject json_param = new JSONObject();
         JSONArray jsonArray = new JSONArray();
-        jsonArray.put(armband_id);
+        for (Armband armband : paired_armbands)
+            jsonArray.put(armband.getArmband_id());
+
         json_param.accumulate("armbands_list", jsonArray);
 
 

@@ -1,10 +1,8 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
-import android.icu.util.ICUUncheckedIOException;
 import android.util.Log;
 
-import com.github.scarecrow.signscognizing.fragments.InputControlPanelFragment;
-
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -58,9 +56,7 @@ public class MessageManager {
     private SignMessage new_added_msg;
 
     public void buildSignMessage() {
-        Armband armband = ArmbandManager.getArmbandsManger()
-                .getCurrentConnectedArmband();
-        new_added_msg = new SignMessage("正在识别手语中", 0, armband);
+        new_added_msg = new SignMessage("正在识别手语中", 0);
         messages_list.add(new_added_msg);
         noticeAllTargetMsgAdded();
     }
@@ -79,36 +75,12 @@ public class MessageManager {
         return new_msg;
     }
 
-
-    /**
-     * 当返回一条手语识别的消息调用后 更新一个手语消息的实例
-     * 有两种情况 一种是新创建的手语消息实例 另一种是重发的手语
-     * 通过手语的id进行map判断这个手语是否被识别过一次
-     *
-     * @param text          手语的文字内容 来自服务器
-     * @param sign_id       手语的id码 来自服务器给定
-     * @return 新生成的手语消息对象
-     */
-    public void updateSignMessage(String text, int sign_id, int capture_id) {
-        SignMessage new_msg;
-        if (sign_message_map.containsKey(sign_id)) {
-            new_msg = sign_message_map.get(sign_id);
-            new_msg.setTextContent(text);
-        } else {
-            new_added_msg.setCaptureId(capture_id);
-            new_added_msg.setTextContent(text);
-            new_added_msg.setMsgId(sign_id);
-            sign_message_map.put(sign_id, new_added_msg);
-        }
-        noticeAllTargetMsgChange();
-    }
-
-    public void updateSignMessage(String feedback_json) {
+    public void processSignMessageFeedback(String feedback_json) {
         try {
             JSONObject jsonObject = new JSONObject(feedback_json);
             String control_info = jsonObject.getString("control");
             if (control_info.equals("update_recognize_res")) {
-                updateSignMessage(jsonObject.getString("text"),
+                processSignMessageFeedback(jsonObject.getString("text"),
                         jsonObject.getInt("sign_id"),
                         jsonObject.getInt("capture_id"));
 
@@ -124,6 +96,29 @@ public class MessageManager {
             Log.e(TAG, "buildSignMessage:  error: " + ee);
             ee.printStackTrace();
         }
+    }
+
+    /**
+     * 当返回一条手语识别的消息调用后 更新一个手语消息的实例
+     * 有两种情况 一种是新创建的手语消息实例 另一种是重发的手语
+     * 通过手语的id进行map判断这个手语是否被识别过一次
+     *
+     * @param text          手语的文字内容 来自服务器
+     * @param sign_id       手语的id码 来自服务器给定
+     * @return 新生成的手语消息对象
+     */
+    private void processSignMessageFeedback(String text, int sign_id, int capture_id) {
+        SignMessage new_msg;
+        if (sign_message_map.containsKey(sign_id)) {
+            new_msg = sign_message_map.get(sign_id);
+            new_msg.setTextContent(text);
+        } else {
+            new_added_msg.setCaptureId(capture_id);
+            new_added_msg.setTextContent(text);
+            new_added_msg.setMsgId(sign_id);
+            sign_message_map.put(sign_id, new_added_msg);
+        }
+        noticeAllTargetMsgChange();
     }
 
     public boolean requestCaptureSign() {
@@ -152,6 +147,20 @@ public class MessageManager {
         return true;
     }
 
+    public boolean stopSignRecognize() {
+        if (capture_state) {
+            SocketConnectionManager.getInstance()
+                    .sendMessage(buildStopCaptureRequest());
+            capture_state = false;
+            noticeAllTargetSignCaptureEnd();
+            return true;
+        } else {
+            Log.e(TAG, "requestCaptureSign: sign capturing didn't start");
+            return false;
+        }
+
+    }
+
     /**
      * 手语识别请求体构造
      * 如果是新增识别， 的 sign_id字段使用0 标识
@@ -159,19 +168,35 @@ public class MessageManager {
      *
      * @return 请求的json
      */
-    public String buildSignRecognizeRequest(int sign_id) {
-        String armband_id = ArmbandManager.getArmbandsManger()
-                .getCurrentConnectedArmband()
-                .getArmband_id();
+    private String buildSignRecognizeRequest(int sign_id) {
+        Armband[] paired_armbands = ArmbandManager.getArmbandsManger()
+                .getCurrentConnectedArmband();
+        JSONArray armbands_json_array = new JSONArray();
+        for (Armband armband : paired_armbands)
+            armbands_json_array.put(armband.getArmband_id());
+
         JSONObject request_body = new JSONObject();
         try {
             request_body.accumulate("control", "sign_cognize_request");
             JSONObject data = new JSONObject();
-            data.accumulate("armband_id", armband_id);
+            data.accumulate("armband_id", armbands_json_array);
             data.accumulate("sign_id", sign_id);
             request_body.accumulate("data", data);
         } catch (Exception ee) {
             Log.e(TAG, "buildSignRecognizeRequest: on build request json " + ee);
+            ee.printStackTrace();
+        }
+        return request_body.toString();
+    }
+
+
+    private String buildStopCaptureRequest() {
+        JSONObject request_body = new JSONObject();
+        try {
+            request_body.accumulate("control", "stop_recognize");
+            request_body.accumulate("data", "");
+        } catch (Exception ee) {
+            Log.e(TAG, "buildStopCaptureRequest: ", ee);
             ee.printStackTrace();
         }
         return request_body.toString();
@@ -218,9 +243,7 @@ public class MessageManager {
     public interface NoticeMessageChanged {
         void onNewMessageAdd();
         void onMessageContentChange();
-
         void onSignCaptureStart();
-
         void onSignCaptureEnd();
     }
 }

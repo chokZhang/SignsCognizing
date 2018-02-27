@@ -1,7 +1,6 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Message;
 
 import android.os.Handler;
@@ -9,7 +8,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.LogRecord;
 
 import static android.content.ContentValues.TAG;
 
@@ -56,7 +54,7 @@ public class SocketConnectionManager {
             switch (msg.what) {
                 case CONNECT_FAILED:
                     ArmbandManager.getArmbandsManger()
-                            .setCurrentConnectedArmband(null);
+                            .releasePairedArmbands();
                     manager_status = DISCONNECTED;
                     noticeListeners(CONNECT_FAILED, null);
                     break;
@@ -93,17 +91,14 @@ public class SocketConnectionManager {
         return instance;
     }
 
-    public void startConnection(Armband target_armband,
-                                TaskCompleteCallback callbackListener) {
+    public void startConnection(TaskCompleteCallback callbackListener) {
         // 这里调连接线程 进行socket连接
-        Log.d(TAG, "startConnection: 连接手环： " + target_armband + "中。。");
         socket_communicator = new SocketCommunicatorThread(main_thread_handler);
         socket_communicator.start();
         socket_communicator.getLooper();
         listener_list = new ArrayList<>();
         listener_list.add(callbackListener);
-        ArmbandManager.getArmbandsManger()
-                .setCurrentConnectedArmband(target_armband);
+
         //当communicator的looper准备完毕后 会通过handler发消息的方式进行连接请求
     }
 

@@ -17,11 +17,9 @@ public class SignMessage extends ConversationMessage {
 
     private boolean is_capture_complete = false;
 
-    private Armband capture_armband;
 
-    public SignMessage(String text, int msg_id, Armband capture_armband) {
+    public SignMessage(String text, int msg_id) {
         super(msg_id, ConversationMessage.SIGN, text);
-        this.capture_armband = capture_armband;
         sign_feedback_stauts = INITIAL;
     }
 

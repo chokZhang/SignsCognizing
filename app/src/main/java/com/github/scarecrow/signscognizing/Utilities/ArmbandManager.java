@@ -1,5 +1,6 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -27,14 +28,21 @@ public class ArmbandManager {
     public static String SERVER_IP_ADDRESS = "http://192.168.0.102:8000/app";
 
     private ArmbandManager() {
-
     }
+
+    private OnUpdateComplete updateCallback;
 
     private static ArmbandManager instance = new ArmbandManager();
 
     private List<Armband> armband_list = new ArrayList<>();
 
-    private Armband current_connected_armband;
+    private boolean armband_pair_mode = false;
+    // true 双手 false 单手
+
+    private Armband current_connected_armband_single;
+
+    private Armband current_connected_armband_right;
+    private Armband current_connected_armband_left;
 
 
     public static ArmbandManager getArmbandsManger() {
@@ -42,36 +50,8 @@ public class ArmbandManager {
     }
 
     public void updateArmbandsList() {
-
-        OkHttpClient okHttpClient = new OkHttpClient();
-
-        Request request = new Request.Builder()
-                .get()
-                .url(SERVER_IP_ADDRESS + "/get_armbands_list/")
-                .build();
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e(TAG, "onFailure: error in  fetchArmbandList " + e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    String res = response.body().string();
-                    // okhttp 中的response.body().string() 只能调用一次
-                    Log.d(TAG, "onResponse: get armbandsss : " + res);
-                    parseArmbandsListJSON(res);
-                }
-            }
-        });
+        new FetchArmbandsList().execute();
     }
-
-    public List<Armband> getArmbandsList() {
-        updateArmbandsList();
-        return armband_list;
-    }
-
 
     private void parseArmbandsListJSON(String armband_list_JSON) {
         armband_list.clear();
@@ -88,11 +68,82 @@ public class ArmbandManager {
     }
 
 
-    public void setCurrentConnectedArmband(Armband armband) {
-        current_connected_armband = armband;
+    public void setOnUpdateCompleteCallback(OnUpdateComplete onUpdateComplete) {
+        updateCallback = onUpdateComplete;
     }
 
-    public Armband getCurrentConnectedArmband() {
-        return current_connected_armband;
+    public boolean getArmbandPairMode() {
+        return armband_pair_mode;
+    }
+
+    public void setArmbandPairMode(boolean mode) {
+        armband_pair_mode = mode;
+    }
+
+
+    public void setCurrentConnectedArmband(Armband armband) {
+        if (!armband_pair_mode)
+            current_connected_armband_single = armband;
+        else
+            Log.e(TAG, "setCurrentConnectedArmband: pair mode cant match");
+    }
+
+    public void setCurrentConnectedArmband(Armband left, Armband right) {
+        if (armband_pair_mode) {
+            current_connected_armband_left = left;
+            current_connected_armband_right = right;
+        } else
+            Log.e(TAG, "setCurrentConnectedArmband: pair mode cant match");
+    }
+
+    public void releasePairedArmbands() {
+        current_connected_armband_single =
+                current_connected_armband_left =
+                        current_connected_armband_right = null;
+    }
+
+
+    public Armband[] getCurrentConnectedArmband() {
+        if (armband_pair_mode)
+            return new Armband[]{current_connected_armband_left, current_connected_armband_right};
+        else
+            return new Armband[]{current_connected_armband_single};
+    }
+
+
+    private class FetchArmbandsList extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Void... param) {
+
+            OkHttpClient okHttpClient = new OkHttpClient();
+
+            Request request = new Request.Builder()
+                    .get()
+                    .url(SERVER_IP_ADDRESS + "/get_armbands_list/")
+                    .build();
+            try {
+                Response response = okHttpClient.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    String res = response.body().string();
+                    parseArmbandsListJSON(res);
+                    return true;
+                }
+            } catch (Exception ee) {
+                Log.e(TAG, "FetchArmbandsList error: " + ee);
+                ee.printStackTrace();
+            }
+            return false;
+
+        }
+
+        @Override
+        protected void onPostExecute(Boolean response) {
+            if (response)
+                updateCallback.noticeUpdateComplete(armband_list);
+        }
+    }
+
+    public interface OnUpdateComplete {
+        void noticeUpdateComplete(List<Armband> armbandList);
     }
 }
