@@ -10,7 +10,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.Armband;
@@ -19,9 +18,7 @@ import com.github.scarecrow.signscognizing.fragments.ArmbandSelectFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static android.content.ContentValues.TAG;
 
@@ -89,7 +86,7 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
         final Armband armband = armband_list.get(position);
         holder.info_display.setText(armband.toString());
         holder.info_display.setBackgroundColor(Color.WHITE);
-        if (armband.getArmband_status() == Armband.ARMBAND_OCCURPIED) {
+        if (armband.getArmbandStatus() == Armband.ARMBAND_OCCURPIED) {
             holder.info_display.setBackgroundColor(Color.LTGRAY);
             holder.select_box.setEnabled(false);
             return;
@@ -97,6 +94,24 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
         boolean select_mode = ArmbandManager.getArmbandsManger().getArmbandPairMode();
         if (select_mode) {
 //            双手模式时 使用checkbox以及count方式选择手环
+//            如果手环已被占用 禁用check box
+            if (armband.getArmbandStatus() == Armband.ARMBAND_OCCURPIED) {
+                holder.select_box.setEnabled(false);
+                holder.select_state.setText("手环已被占用");
+                return;
+            }
+//            初始化选择状态显示
+            holder.select_box.setChecked(false);
+            holder.select_state.setText("");
+
+            if (armband.getPairStatus() != Armband.NO_PAIR) {
+                holder.select_box.setChecked(true);
+                if (armband.getPairStatus() == Armband.PAIR_LEFT_HAND)
+                    holder.select_state.setText("作为左手手环");
+                else
+                    holder.select_state.setText("作为右手手环");
+
+            }
             holder.select_box.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -152,37 +167,31 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
                                            ArmbandListItemViewHolder holder) {
         switch (select_state) {
             case 0:
-                select_booking.put(armband, 1);
                 select_state = 1;
-                holder.select_state.setText("作为左手手环");
+                pairToLeftHand(armband, holder);
                 break;
             case 1:
                 if (is_select) {
-                    select_booking.put(armband, 2);
                     select_state = 3;
-                    holder.select_state.setText("作为右手手环");
+                    pairToRightHand(armband, holder);
                 } else {
                     select_state = 0;
-                    select_booking.remove(armband);
-                    holder.select_state.setText("");
+                    undoPairToHand(armband, holder);
                 }
                 break;
             case 2:
                 if (is_select) {
-                    select_booking.put(armband, 1);
                     select_state = 3;
-                    holder.select_state.setText("作为左手手环");
+                    pairToLeftHand(armband, holder);
                 } else {
-                    select_booking.remove(armband);
-                    holder.select_state.setText("");
+                    undoPairToHand(armband, holder);
                     select_state = 0;
                 }
                 break;
             case 3:
                 if (!is_select) {
                     int res = select_booking.get(armband);
-                    select_booking.remove(armband);
-                    holder.select_state.setText("");
+                    undoPairToHand(armband, holder);
                     if (res == 1)
                         select_state = 2;
                     else if (res == 2)
@@ -190,6 +199,24 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
                 }
                 break;
         }
+    }
+
+    private void pairToLeftHand(Armband armband, ArmbandListItemViewHolder holder) {
+        holder.select_state.setText("作为左手手环");
+        select_booking.put(armband, 1);
+        armband.setPairStatus(Armband.PAIR_LEFT_HAND);
+    }
+
+    private void pairToRightHand(Armband armband, ArmbandListItemViewHolder holder) {
+        armband.setPairStatus(Armband.PAIR_RIGHT_HAND);
+        select_booking.put(armband, 2);
+        holder.select_state.setText("作为右手手环");
+    }
+
+    private void undoPairToHand(Armband armband, ArmbandListItemViewHolder holder) {
+        holder.select_state.setText("");
+        select_booking.remove(armband);
+        armband.setPairStatus(Armband.NO_PAIR);
     }
 
 

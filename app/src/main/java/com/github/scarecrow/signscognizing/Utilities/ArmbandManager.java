@@ -138,8 +138,10 @@ public class ArmbandManager {
 
         @Override
         protected void onPostExecute(Boolean response) {
-            if (response)
+            if (response) {
                 updateCallback.noticeUpdateComplete(armband_list);
+                this.cancel(false);
+            }
         }
     }
 

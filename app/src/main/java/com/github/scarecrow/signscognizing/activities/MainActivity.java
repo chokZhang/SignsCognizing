@@ -27,12 +27,14 @@ public class MainActivity extends AppCompatActivity {
             FRAGMENT_INFO_DISPLAY = -29,
             FRAGMENT_SETTING = 30;
 
+    public static Context app_context;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        app_context = getApplicationContext();
         switchFragment(FRAGMENT_START_CONTROL);
         switchFragment(FRAGMENT_INFO_DISPLAY);
         SpeechUtility.createUtility(getApplicationContext(), "appid=5a883f0c");

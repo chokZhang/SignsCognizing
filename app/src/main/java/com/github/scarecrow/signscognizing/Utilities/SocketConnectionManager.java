@@ -92,6 +92,8 @@ public class SocketConnectionManager {
     }
 
     public void startConnection(TaskCompleteCallback callbackListener) {
+        if (manager_status == CONNECTED)
+            return;
         // 这里调连接线程 进行socket连接
         socket_communicator = new SocketCommunicatorThread(main_thread_handler);
         socket_communicator.start();
@@ -107,6 +109,8 @@ public class SocketConnectionManager {
     }
 
     public void disconnect() {
+        if (manager_status == DISCONNECTED)
+            return;
         manager_status = DISCONNECTED;
         ArmbandManager.getArmbandsManger()
                 .setCurrentConnectedArmband(null);

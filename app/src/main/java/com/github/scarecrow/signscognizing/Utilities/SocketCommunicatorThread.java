@@ -1,33 +1,24 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.nio.charset.Charset;
-import java.util.Scanner;
 
-import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okio.BufferedSink;
 
 /**
  * Created by Scarecrow on 2018/2/8.
@@ -158,7 +149,7 @@ public class SocketCommunicatorThread extends HandlerThread {
         JSONObject json_param = new JSONObject();
         JSONArray jsonArray = new JSONArray();
         for (Armband armband : paired_armbands)
-            jsonArray.put(armband.getArmband_id());
+            jsonArray.put(armband.getArmbandId());
 
         json_param.accumulate("armbands_list", jsonArray);
 

@@ -51,7 +51,7 @@ public class VoiceMessage extends ConversationMessage {
         super(msg_id, ConversationMessage.VOICE, "正在识别语音");
         this.voice_file_path = voice_file_path;
         Log.d(TAG, "VoiceMessage: building new msg voice path: " + voice_file_path);
-        transVoice2Text();
+//   todo     transVoice2Text();
     }
 
 
