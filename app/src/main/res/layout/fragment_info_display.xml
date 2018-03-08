@@ -4,17 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center">
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/info_display_image_view"
-        android:src="@mipmap/ic_launcher"/>
+    android:gravity="center"
+    android:background="#2eFFFFFF">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/info_display_text_view"
         android:textSize="60sp"
-        android:text="@string/手语识别"/>
+        android:textColor="#FFFFFF"
+        android:text="@string/欢迎语" />
 </LinearLayout>

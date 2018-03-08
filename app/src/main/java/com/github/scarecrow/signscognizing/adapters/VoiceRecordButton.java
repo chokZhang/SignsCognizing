@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
@@ -25,7 +26,7 @@ import static android.content.ContentValues.TAG;
  * 仿微信可通过手势控制的音频录制按钮
  */
 
-public class VoiceRecordButton extends AppCompatButton {
+public class VoiceRecordButton extends AppCompatImageButton {
 
     private static final int RECORD_ON = -5,
             RECORD_OFF = -9;
@@ -99,7 +100,6 @@ public class VoiceRecordButton extends AppCompatButton {
                 recorder_state = RECORD_OFF;
                 recorder_dialog.dismiss();
                 record_timer_thread.interrupt();
-                this.setText("语音输入");
                 if (is_cancel) {
                     recorder.stop();
                 } else {
@@ -138,11 +138,11 @@ public class VoiceRecordButton extends AppCompatButton {
         if (is_can_cancel) {
             dialog_img.setImageResource(R.mipmap.record_cancel);
             dialog_text.setText("松开手指可取消录音");
-            this.setText("松开手指 取消录音");
+//            this.setText("松开手指 取消录音");
         } else {
             dialog_img.setImageResource(R.mipmap.record_animate_01);
             dialog_text.setText("向上滑动可取消录音");
-            this.setText("松开手指 完成录音");
+//            this.setText("松开手指 完成录音");
 
         }
         if (!recorder_dialog.isShowing())

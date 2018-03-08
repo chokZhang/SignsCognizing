@@ -14,22 +14,37 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+
+        <ImageButton
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:id="@+id/button_input_panel_sign_start"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/手语识别"
+            android:src="@mipmap/sign_icon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sign_input_state_tv"
             android:textSize="30sp"
-            android:layout_marginBottom="30dp"
-            android:text="@string/手语识别" />
+            android:textColor="#ee000000"
+            android:text="@string/手语识别"
+            android:layout_marginBottom="40dp" />
 
 
         <com.github.scarecrow.signscognizing.adapters.VoiceRecordButton
-            android:layout_width="match_parent"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@mipmap/speech_icon"
+            android:id="@+id/button_input_panel_voice_start" />
+
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="30sp"
-            android:id="@+id/button_input_panel_voice_start"
-            android:text="@string/输入语音"
-            android:layout_marginBottom="30dp" />
+            android:textColor="#ee000000"
+            android:text="@string/输入语音" />
     </LinearLayout>
 
     <Button

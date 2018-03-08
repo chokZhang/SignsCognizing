@@ -167,6 +167,8 @@ public class ArmbandSelectFragment extends Fragment {
                     public void onDisconnect() {
                         Toast.makeText(MainActivity.app_context, "与服务器断开连接", Toast.LENGTH_SHORT)
                                 .show();
+                        MessageManager.getInstance()
+                                .stopSignRecognize();
                     }
                 });
     }

@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.MessageManager;
@@ -53,7 +55,8 @@ public class InputControlPanelFragment extends Fragment {
 
 
         //手语输入
-        final Button bt_cap = view.findViewById(R.id.button_input_panel_sign_start);
+        final ImageButton bt_cap = view.findViewById(R.id.button_input_panel_sign_start);
+        final TextView cap_state = view.findViewById(R.id.sign_input_state_tv);
         bt_cap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -63,13 +66,13 @@ public class InputControlPanelFragment extends Fragment {
                     boolean res = MessageManager.getInstance()
                             .requestCaptureSign();
                     if (res)
-                        bt_cap.setText("结束手语采集");
+                        cap_state.setText("结束手语采集");
 
                 } else {
                     boolean res = MessageManager.getInstance()
                             .stopSignRecognize();
                     if (res)
-                        bt_cap.setText("开始手语采集");
+                        cap_state.setText("开始手语采集");
                 }
             }
         });
@@ -85,12 +88,12 @@ public class InputControlPanelFragment extends Fragment {
 
                     @Override
                     public void onSignCaptureEnd() {
-                        bt_cap.setText("开始手语采集");
+                        cap_state.setText("开始手语采集");
                     }
 
                     @Override
                     public void onSignCaptureStart() {
-                        bt_cap.setText("结束手语采集");
+                        cap_state.setText("结束手语采集");
                     }
                 });
 

@@ -85,14 +85,13 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
     public void onBindViewHolder(final ArmbandListItemViewHolder holder, int position) {
         final Armband armband = armband_list.get(position);
         holder.info_display.setText(armband.toString());
-        holder.info_display.setBackgroundColor(Color.WHITE);
-        if (armband.getArmbandStatus() == Armband.ARMBAND_OCCURPIED) {
-            holder.info_display.setBackgroundColor(Color.LTGRAY);
-            holder.select_box.setEnabled(false);
-            return;
-        }
+        holder.item_body.setBackgroundResource(R.color.block_white);
         boolean select_mode = ArmbandManager.getArmbandsManger().getArmbandPairMode();
         if (select_mode) {
+            //            初始化选择状态显示
+            holder.both_hand_check_view.setVisibility(View.VISIBLE);
+            holder.select_box.setChecked(false);
+            holder.select_state.setText("");
 //            双手模式时 使用checkbox以及count方式选择手环
 //            如果手环已被占用 禁用check box
             if (armband.getArmbandStatus() == Armband.ARMBAND_OCCURPIED) {
@@ -100,10 +99,6 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
                 holder.select_state.setText("手环已被占用");
                 return;
             }
-//            初始化选择状态显示
-            holder.select_box.setChecked(false);
-            holder.select_state.setText("");
-
             if (armband.getPairStatus() != Armband.NO_PAIR) {
                 holder.select_box.setChecked(true);
                 if (armband.getPairStatus() == Armband.PAIR_LEFT_HAND)
@@ -126,6 +121,10 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
         } else {
 //            单手模式时 使用点击list里的item方式
             holder.both_hand_check_view.setVisibility(View.GONE);
+            if (armband.getArmbandStatus() == Armband.ARMBAND_OCCURPIED) {
+                holder.item_body.setBackgroundResource(R.color.dark_alpha);
+                return;
+            }
             holder.item_body.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
