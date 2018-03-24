@@ -1,6 +1,11 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
+import android.os.Bundle;
 import android.util.Log;
+
+import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechSynthesizer;
+import com.iflytek.cloud.SynthesizerListener;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,9 +29,45 @@ import static android.content.ContentValues.TAG;
 public class MessageManager {
     private MessageManager() {
         messages_list = new ArrayList<>();
+
+
     }
 
     private static MessageManager instance = new MessageManager();
+
+    private SpeechSynthesizer synthesizer = SpeechSynthesizer.getSynthesizer();
+
+    private SynthesizerListener synthesizerListener = new SynthesizerListener() {
+        @Override
+        public void onSpeakBegin() {
+            Log.d(TAG, "onSpeakBegin: ");
+        }
+
+        @Override
+        public void onBufferProgress(int i, int i1, int i2, String s) {
+        }
+
+        @Override
+        public void onSpeakPaused() {
+        }
+
+        @Override
+        public void onSpeakResumed() {
+        }
+
+        @Override
+        public void onSpeakProgress(int i, int i1, int i2) {
+        }
+
+        @Override
+        public void onCompleted(SpeechError speechError) {
+            Log.d(TAG, "onCompleted: ");
+        }
+
+        @Override
+        public void onEvent(int i, int i1, int i2, Bundle bundle) {
+        }
+    };
 
     private List<ConversationMessage> messages_list;
 
@@ -111,8 +152,10 @@ public class MessageManager {
         SignMessage new_msg;
         if (sign_message_map.containsKey(sign_id)) {
             new_msg = sign_message_map.get(sign_id);
+            synthesizeVoice(text, new_msg.getTextContent());
             new_msg.setTextContent(text);
         } else {
+            synthesizeVoice(text, "");
             new_added_msg.setCaptureId(capture_id);
             new_added_msg.setTextContent(text);
             new_added_msg.setMsgId(sign_id);
@@ -120,6 +163,12 @@ public class MessageManager {
         }
         noticeAllTargetMsgChange();
     }
+
+    private void synthesizeVoice(String new_text, String history_text) {
+        String voice_str = new_text.substring(history_text.length());
+        synthesizer.startSpeaking(voice_str, synthesizerListener);
+    }
+
 
     public boolean requestCaptureSign() {
         if (capture_state) {
@@ -209,6 +258,11 @@ public class MessageManager {
 
     public List<ConversationMessage> getMessagesList() {
         return messages_list;
+    }
+
+    public void cleanMessageList() {
+        messages_list.clear();
+        noticeAllTargetMsgChange();
     }
 
     public void addNewNoticeTarget(NoticeMessageChanged obj) {
