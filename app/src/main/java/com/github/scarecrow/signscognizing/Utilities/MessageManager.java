@@ -2,6 +2,7 @@ package com.github.scarecrow.signscognizing.Utilities;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechSynthesizer;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static android.content.ContentValues.TAG;
+import static com.github.scarecrow.signscognizing.activities.MainActivity.APP_CONTEXT;
 
 /**
  * Created by Scarecrow on 2018/2/8.
@@ -27,16 +29,8 @@ import static android.content.ContentValues.TAG;
  */
 
 public class MessageManager {
-    private MessageManager() {
-        messages_list = new ArrayList<>();
-
-
-    }
-
     private static MessageManager instance = new MessageManager();
-
     private SpeechSynthesizer synthesizer = SpeechSynthesizer.getSynthesizer();
-
     private SynthesizerListener synthesizerListener = new SynthesizerListener() {
         @Override
         public void onSpeakBegin() {
@@ -68,17 +62,26 @@ public class MessageManager {
         public void onEvent(int i, int i1, int i2, Bundle bundle) {
         }
     };
-
     private List<ConversationMessage> messages_list;
-
     private List<NoticeMessageChanged> notice_list = new ArrayList<>();
-
     private Map<Integer, SignMessage> sign_message_map = new Hashtable<>();
-
     private boolean capture_state = false;
+    /**
+     * 这个方法被用于inputControl的fragment中
+     * 在这个fragment中点按创建的手语识别消息都是新建的
+     * 该方法先新建一个手语消息实例并并显示出来 并将该实例暂存下来
+     * 当时识别完成后使用回调更新该手语的数据
+     */
+    private SignMessage new_added_msg;
     // false -> 没有采集
     // true  -> 采集中
 
+
+    private MessageManager() {
+        messages_list = new ArrayList<>();
+
+
+    }
 
     public static MessageManager getInstance() {
         return instance;
@@ -87,14 +90,6 @@ public class MessageManager {
     private int acquire_curr_id() {
         return messages_list.size();
     }
-
-    /**
-     * 这个方法被用于inputControl的fragment中
-     * 在这个fragment中点按创建的手语识别消息都是新建的
-     * 该方法先新建一个手语消息实例并并显示出来 并将该实例暂存下来
-     * 当时识别完成后使用回调更新该手语的数据
-     */
-    private SignMessage new_added_msg;
 
     public void buildSignMessage() {
         new_added_msg = new SignMessage("正在识别手语中", 0);
@@ -176,10 +171,20 @@ public class MessageManager {
             return false;
         }
         capture_state = true;
-        SocketConnectionManager.getInstance()
-                .sendMessage(buildSignRecognizeRequest(0));
-        MessageManager.getInstance()
-                .buildSignMessage();
+        try {
+            SocketConnectionManager.getInstance()
+                    .sendMessage(buildSignRecognizeRequest(0));
+            MessageManager.getInstance()
+                    .buildSignMessage();
+        } catch (Exception ee) {
+            Log.e(TAG, "requestCaptureSign: can not create request, " + ee.getMessage());
+            Toast.makeText(APP_CONTEXT,
+                    "与服务器连接已断开，请退出后重新连接手环再发起识别请求",
+                    Toast.LENGTH_LONG)
+                    .show();
+            capture_state = false;
+            return false;
+        }
         return true;
     }
 
@@ -188,11 +193,21 @@ public class MessageManager {
             Log.e(TAG, "requestCaptureSign: sign capturing repeat");
             return false;
         }
-        capture_state = true;
-        message.setCaptureComplete(false);
-        noticeAllTargetMsgSignCaptureStart();
-        SocketConnectionManager.getInstance()
-                .sendMessage(buildSignRecognizeRequest(message.getMsgId()));
+        try {
+            capture_state = true;
+            message.setCaptureComplete(false);
+            noticeAllTargetMsgSignCaptureStart();
+            SocketConnectionManager.getInstance()
+                    .sendMessage(buildSignRecognizeRequest(message.getMsgId()));
+        } catch (Exception ee) {
+            Log.e(TAG, "requestCaptureSign: can not create request, " + ee.getMessage());
+            capture_state = false;
+            Toast.makeText(APP_CONTEXT,
+                    "与服务器连接已断开，请退出后重新连接手环再发起识别请求",
+                    Toast.LENGTH_LONG)
+                    .show();
+            return false;
+        }
         return true;
     }
 
@@ -217,13 +232,15 @@ public class MessageManager {
      *
      * @return 请求的json
      */
-    private String buildSignRecognizeRequest(int sign_id) {
+    private String buildSignRecognizeRequest(int sign_id) throws Exception {
         Armband[] paired_armbands = ArmbandManager.getArmbandsManger()
                 .getCurrentConnectedArmband();
         JSONArray armbands_json_array = new JSONArray();
-        for (Armband armband : paired_armbands)
+        for (Armband armband : paired_armbands) {
+            if (armband == null)
+                throw new Exception("paired armband lose");
             armbands_json_array.put(armband.getArmbandId());
-
+        }
         JSONObject request_body = new JSONObject();
         try {
             request_body.accumulate("control", "sign_cognize_request");

@@ -12,16 +12,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.Armband;
+import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.Utilities.MessageManager;
 import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
 import com.github.scarecrow.signscognizing.activities.MainActivity;
-import com.github.scarecrow.signscognizing.R;
-import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.adapters.ArmbandListRecyclerViewAdapter;
 
 import java.util.List;
-import java.util.Map;
 
 import static android.content.ContentValues.TAG;
 
@@ -31,8 +30,8 @@ import static android.content.ContentValues.TAG;
  */
 
 public class ArmbandSelectFragment extends Fragment {
+    final ArmbandListRecyclerViewAdapter adapter = new ArmbandListRecyclerViewAdapter();
     private View fragment_view ;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -56,8 +55,6 @@ public class ArmbandSelectFragment extends Fragment {
         return view;
     }
 
-
-    final ArmbandListRecyclerViewAdapter adapter = new ArmbandListRecyclerViewAdapter();
     @Override
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
@@ -165,7 +162,7 @@ public class ArmbandSelectFragment extends Fragment {
 
                     @Override
                     public void onDisconnect() {
-                        Toast.makeText(MainActivity.app_context, "与服务器断开连接", Toast.LENGTH_SHORT)
+                        Toast.makeText(MainActivity.APP_CONTEXT, "与服务器断开连接", Toast.LENGTH_SHORT)
                                 .show();
                         MessageManager.getInstance()
                                 .stopSignRecognize();

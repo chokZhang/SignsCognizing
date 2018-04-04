@@ -26,9 +26,9 @@ import okhttp3.Response;
 
 public class SocketCommunicatorThread extends HandlerThread {
 
-    private static final MediaType MEDIA_TYPE_JSON
+    public static final MediaType MEDIA_TYPE_JSON
             = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
-    private static final String HOST_IP = "192.168.0.102";
+    public static final String HOST_IP = "192.168.0.102";
 
     private static String TAG = "SocketCommunicator";
 
@@ -138,22 +138,16 @@ public class SocketCommunicatorThread extends HandlerThread {
      * @throws Exception 中间遇到的exception
      */
     private int getTargetPort() throws Exception {
-
-        OkHttpClient okHttpClient = new OkHttpClient();
-
         String param_name = "armband_id";
         Armband[] paired_armbands = ArmbandManager.getArmbandsManger()
                 .getCurrentConnectedArmband();
-
-        // todo 这里为双手手环做准备 上传的参数是一个list
         JSONObject json_param = new JSONObject();
         JSONArray jsonArray = new JSONArray();
         for (Armband armband : paired_armbands)
             jsonArray.put(armband.getArmbandId());
-
         json_param.accumulate("armbands_list", jsonArray);
 
-
+        OkHttpClient okHttpClient = new OkHttpClient();
         RequestBody requestBody = RequestBody
                 .create(MEDIA_TYPE_JSON, "?" + param_name + "=" + json_param);
         // 这里非常奇怪 必须要在第一个参数名前面加上 ? 才能使django接受post内容
@@ -162,7 +156,6 @@ public class SocketCommunicatorThread extends HandlerThread {
                 .url(ArmbandManager.SERVER_IP_ADDRESS + "/request_socket_connection/")
                 .post(requestBody)
                 .build();
-
         Response response = okHttpClient.newCall(request).execute();
         if (response.isSuccessful()) {
             return Integer.valueOf(response.body().string());

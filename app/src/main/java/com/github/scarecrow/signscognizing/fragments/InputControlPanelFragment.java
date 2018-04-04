@@ -60,6 +60,7 @@ public class InputControlPanelFragment extends Fragment {
         bt_cap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 boolean capture_state = MessageManager.getInstance()
                         .isCapturingSign();
                 if (!capture_state) {

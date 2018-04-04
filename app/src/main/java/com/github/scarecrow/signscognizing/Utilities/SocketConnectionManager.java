@@ -1,15 +1,17 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
 import android.annotation.SuppressLint;
-import android.os.Message;
-
+import android.content.Context;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
+import static com.github.scarecrow.signscognizing.activities.MainActivity.APP_CONTEXT;
 
 /**
  * Created by Scarecrow on 2018/2/8.
@@ -38,12 +40,11 @@ public class SocketConnectionManager {
     //status code
     public static final int DISCONNECTED = 979,
             CONNECTED = 56;
-
-    private int manager_status = DISCONNECTED;
-
     private static SocketConnectionManager instance = new SocketConnectionManager();
+    private int manager_status = DISCONNECTED;
     private SocketCommunicatorThread socket_communicator;
     private List<TaskCompleteCallback> listener_list;
+    private Context app_context;
 
     // 负责从连接线程接受消息然后通过回调与外界进行互动的handler
     // 该处在主线程
@@ -91,6 +92,10 @@ public class SocketConnectionManager {
         return instance;
     }
 
+    public void setContext(Context context) {
+        app_context = context;
+    }
+
     public void startConnection(TaskCompleteCallback callbackListener) {
         if (manager_status == CONNECTED)
             return;
@@ -105,7 +110,14 @@ public class SocketConnectionManager {
     }
 
     public void sendMessage(String message) {
-        socket_communicator.sendMessage(message);
+        if (manager_status == CONNECTED)
+            socket_communicator.sendMessage(message);
+        else {
+            Toast.makeText(APP_CONTEXT,
+                    "与服务器连接已断开，请退出后重新连接手环再发起识别请求",
+                    Toast.LENGTH_LONG)
+                    .show();
+        }
     }
 
     public void disconnect() {

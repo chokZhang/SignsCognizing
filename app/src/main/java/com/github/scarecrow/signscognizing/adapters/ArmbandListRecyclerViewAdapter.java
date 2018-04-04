@@ -1,11 +1,11 @@
 package com.github.scarecrow.signscognizing.adapters;
 
-import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
@@ -43,22 +43,6 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
     private int select_state = 0;
     private HashMap<Armband, Integer> select_booking = new HashMap<>();
 
-    static class ArmbandListItemViewHolder extends RecyclerView.ViewHolder {
-        public LinearLayout item_body, both_hand_check_view;
-        public TextView info_display;
-        public CheckBox select_box;
-        public TextView select_state;
-
-        public ArmbandListItemViewHolder(View item_view) {
-            super(item_view);
-            item_body = (LinearLayout) item_view;
-            info_display = item_view.findViewById(R.id.armband_list_item_info_textview);
-            select_box = item_view.findViewById(R.id.armband_select_checkbox);
-            select_state = item_view.findViewById(R.id.textview_select_state);
-            both_hand_check_view = item_view.findViewById(R.id.both_hand_check_view);
-        }
-    }
-
     public ArmbandListRecyclerViewAdapter() {
         init_state();
         this.armband_list = new ArrayList<>();
@@ -86,6 +70,13 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
         final Armband armband = armband_list.get(position);
         holder.info_display.setText(armband.toString());
         holder.item_body.setBackgroundResource(R.color.block_white);
+        holder.ping_armband.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                armband.ping();
+            }
+        });
+
         boolean select_mode = ArmbandManager.getArmbandsManger().getArmbandPairMode();
         if (select_mode) {
             //            初始化选择状态显示
@@ -160,7 +151,6 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
         select_booking = new HashMap<>();
     }
 
-
     //使用自动机状态转移控制手环的选择
     private void armbandSelectStateChanged(Armband armband, boolean is_select,
                                            ArmbandListItemViewHolder holder) {
@@ -216,6 +206,24 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
         holder.select_state.setText("");
         select_booking.remove(armband);
         armband.setPairStatus(Armband.NO_PAIR);
+    }
+
+    static class ArmbandListItemViewHolder extends RecyclerView.ViewHolder {
+        public LinearLayout item_body, both_hand_check_view;
+        public TextView info_display;
+        public CheckBox select_box;
+        public TextView select_state;
+        public Button ping_armband;
+
+        public ArmbandListItemViewHolder(View item_view) {
+            super(item_view);
+            item_body = (LinearLayout) item_view;
+            info_display = item_view.findViewById(R.id.armband_list_item_info_textview);
+            select_box = item_view.findViewById(R.id.armband_select_checkbox);
+            select_state = item_view.findViewById(R.id.textview_select_state);
+            both_hand_check_view = item_view.findViewById(R.id.both_hand_check_view);
+            ping_armband = item_view.findViewById(R.id.button_ping_armband);
+        }
     }
 
 

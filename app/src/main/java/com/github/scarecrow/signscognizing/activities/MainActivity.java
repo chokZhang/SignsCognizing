@@ -1,10 +1,10 @@
 package com.github.scarecrow.signscognizing.activities;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.github.scarecrow.signscognizing.R;
@@ -28,14 +28,14 @@ public class MainActivity extends AppCompatActivity {
             FRAGMENT_INFO_DISPLAY = -29,
             FRAGMENT_SETTING = 30;
 
-    public static Context app_context;
+    public static Context APP_CONTEXT;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        app_context = getApplicationContext();
+        APP_CONTEXT = getApplicationContext();
         switchFragment(FRAGMENT_START_CONTROL);
         switchFragment(FRAGMENT_INFO_DISPLAY);
         SpeechUtility.createUtility(getApplicationContext(), "appid=5a883f0c");
