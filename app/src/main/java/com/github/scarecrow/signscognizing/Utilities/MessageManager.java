@@ -311,16 +311,6 @@ public class MessageManager {
         }
     }
 
-    public interface NoticeMessageChanged {
-        void onNewMessageAdd();
-        void onMessageContentChange();
-        void onSignCaptureStart();
-        void onSignCaptureEnd();
-    }
-
-
-    //dubug
-/*
     public void sampleDisplayCreate(){
         buildSignMessage();
         processSignMessageFeedback("医生 您好",2,1);
@@ -331,42 +321,19 @@ public class MessageManager {
         v.setTextContent("您好，请问您那里不舒服？");
         noticeAllTargetMsgChange();
 
-        buildSignMessage();
-        processSignMessageFeedback("我 发烧 了，嗓子 很痛",3,2);
-        processSignMessageFeedback("{\"control\":\"end_recognize\",\"sign_id\":3}");
-        noticeAllTargetSignCaptureEnd();
 
-        v = buildVoiceMessage("");
-        v.setTextContent("来，你张开嘴，我看下你的喉咙。");
-        noticeAllTargetMsgChange();
-
-        v = buildVoiceMessage("");
-        v.setTextContent("看起来是嗓子发炎了。你发烧多久了，体温多少度？");
-        noticeAllTargetMsgChange();
-
-        buildSignMessage();
-        processSignMessageFeedback("2 天 ，38 点 8 ",4,3);
-        processSignMessageFeedback("{\"control\":\"end_recognize\",\"sign_id\":4}");
-        noticeAllTargetSignCaptureEnd();
-
-        v = buildVoiceMessage("");
-        v.setTextContent("这几天有受凉吗，身边人有没有生病感冒？");
-        noticeAllTargetMsgChange();
-
-        buildSignMessage();
-        processSignMessageFeedback("发烧 前 1 天 晚上 跑步 ，母亲 生病 了",5,4);
-        processSignMessageFeedback("{\"control\":\"end_recognize\",\"sign_id\":5}");
-        noticeAllTargetSignCaptureEnd();
+    }
 
 
-        v = buildVoiceMessage("");
-        v.setTextContent("好的，我给你开张单子，你先去二楼验个血，等一会就能出结果。" +
-                            "然后你再回来找我，我看情况给你开药或者是打针");
-        noticeAllTargetMsgChange();
+    //dubug
 
-        buildSignMessage();
-        processSignMessageFeedback("好的 谢谢 医生",6,5);
-        processSignMessageFeedback("{\"control\":\"end_recognize\",\"sign_id\":6}");
-        noticeAllTargetSignCaptureEnd();
-    }*/
+    public interface NoticeMessageChanged {
+        void onNewMessageAdd();
+
+        void onMessageContentChange();
+
+        void onSignCaptureStart();
+
+        void onSignCaptureEnd();
+    }
 }

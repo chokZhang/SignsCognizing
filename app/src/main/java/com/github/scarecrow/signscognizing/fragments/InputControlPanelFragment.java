@@ -45,8 +45,8 @@ public class InputControlPanelFragment extends Fragment {
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SocketConnectionManager.getInstance()
-                        .disconnect();
+                MessageManager.getInstance().stopSignRecognize();
+                SocketConnectionManager.getInstance().disconnect();
                 MainActivity activity = (MainActivity) getActivity();
                 activity.switchFragment(MainActivity.FRAGMENT_ARMBANDS_SELECT);
                 activity.switchFragment(MainActivity.FRAGMENT_INFO_DISPLAY);

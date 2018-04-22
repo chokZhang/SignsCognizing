@@ -54,14 +54,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end" />
+
+            <Button
+                android:id="@+id/button_ping_armband"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_gravity="end"
+                android:text="ping" />
+
         </LinearLayout>
 
-        <Button
-            android:id="@+id/button_ping_armband"
-            android:layout_width="80dp"
-            android:layout_height="40dp"
-            android:layout_gravity="end"
-            android:text="ping" />
 
     </LinearLayout>
 
