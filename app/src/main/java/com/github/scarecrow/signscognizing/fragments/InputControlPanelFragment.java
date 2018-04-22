@@ -2,11 +2,14 @@ package com.github.scarecrow.signscognizing.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.github.scarecrow.signscognizing.R;
@@ -14,6 +17,10 @@ import com.github.scarecrow.signscognizing.Utilities.MessageManager;
 import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
 import com.github.scarecrow.signscognizing.activities.MainActivity;
 import com.github.scarecrow.signscognizing.adapters.VoiceRecordButton;
+
+import org.json.JSONObject;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by Scarecrow on 2018/2/
@@ -50,6 +57,26 @@ public class InputControlPanelFragment extends Fragment {
                 MainActivity activity = (MainActivity) getActivity();
                 activity.switchFragment(MainActivity.FRAGMENT_ARMBANDS_SELECT);
                 activity.switchFragment(MainActivity.FRAGMENT_INFO_DISPLAY);
+            }
+        });
+
+        final TextView textView = view.findViewById(R.id.recognize_model_display);
+        textView.setText("离线识别");
+        Switch switcher = view.findViewById(R.id.recognize_model_switch);
+        switcher.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    Log.d(TAG, "onCheckedChanged: 切换至在线识别模式");
+                    textView.setText("在线识别");
+                    SocketConnectionManager.getInstance()
+                            .sendMessage(buildRecognizeModeSwitchRequest("online"));
+                } else {
+                    Log.d(TAG, "onCheckedChanged: 切换至离线识别模式");
+                    textView.setText("离线识别");
+                    SocketConnectionManager.getInstance()
+                            .sendMessage(buildRecognizeModeSwitchRequest("offline"));
+                }
             }
         });
 
@@ -97,12 +124,22 @@ public class InputControlPanelFragment extends Fragment {
                         cap_state.setText("结束手语采集");
                     }
                 });
-
-
-
         //语音输入
     }
 
+    private String buildRecognizeModeSwitchRequest(String mode) {
+        JSONObject request_body = new JSONObject();
+        try {
+            request_body.accumulate("control", "switch_recognize_mode");
+            JSONObject data = new JSONObject();
+            data.accumulate("mode", mode);
+            request_body.accumulate("data", data);
+        } catch (Exception ee) {
+            Log.e(TAG, "buildSignRecognizeRequest: on build request json " + ee);
+            ee.printStackTrace();
+        }
+        return request_body.toString();
+    }
 
     @Override
     public void onStop() {
