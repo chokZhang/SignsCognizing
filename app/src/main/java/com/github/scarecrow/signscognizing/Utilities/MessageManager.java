@@ -1,17 +1,23 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
-import android.os.Bundle;
+import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.iflytek.cloud.SpeechError;
-import com.iflytek.cloud.SpeechSynthesizer;
-import com.iflytek.cloud.SynthesizerListener;
+import com.baidu.tts.chainofresponsibility.logger.LoggerProxy;
+import com.baidu.tts.client.SpeechSynthesizer;
+import com.baidu.tts.client.TtsMode;
+import com.github.scarecrow.signscognizing.Utilities.baidu_tts.InitConfig;
+import com.github.scarecrow.signscognizing.Utilities.baidu_tts.MySynthesizer;
+import com.github.scarecrow.signscognizing.Utilities.baidu_tts.NonBlockSynthesizer;
+import com.github.scarecrow.signscognizing.Utilities.baidu_tts.OfflineResource;
+import com.github.scarecrow.signscognizing.Utilities.baidu_tts.TTSMassageListener;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -30,42 +36,23 @@ import static com.github.scarecrow.signscognizing.activities.MainActivity.APP_CO
 
 public class MessageManager {
     private static MessageManager instance = new MessageManager();
-    private SpeechSynthesizer synthesizer = SpeechSynthesizer.getSynthesizer();
-    private SynthesizerListener synthesizerListener = new SynthesizerListener() {
-        @Override
-        public void onSpeakBegin() {
-            Log.d(TAG, "onSpeakBegin: ");
-        }
-
-        @Override
-        public void onBufferProgress(int i, int i1, int i2, String s) {
-        }
-
-        @Override
-        public void onSpeakPaused() {
-        }
-
-        @Override
-        public void onSpeakResumed() {
-        }
-
-        @Override
-        public void onSpeakProgress(int i, int i1, int i2) {
-        }
-
-        @Override
-        public void onCompleted(SpeechError speechError) {
-            Log.d(TAG, "onCompleted: ");
-        }
-
-        @Override
-        public void onEvent(int i, int i1, int i2, Bundle bundle) {
-        }
-    };
+    // 离线发音选择，VOICE_FEMALE即为离线女声发音。
+    protected String offlineVoice = OfflineResource.VOICE_MALE;
     private List<ConversationMessage> messages_list;
     private List<NoticeMessageChanged> notice_list = new ArrayList<>();
     private Map<Integer, SignMessage> sign_message_map = new Hashtable<>();
     private boolean capture_state = false;
+    private String appId = "11138165";
+    private String appKey = "atDLVSr4NFmDNPxPWHxWnPVS";
+    private String secretKey = "20da52346b042869be7cda3f8fb12cf5";
+    // TtsMode.MIX; 离在线融合，在线优先； TtsMode.ONLINE 纯在线； 没有纯离线
+    private TtsMode ttsMode = TtsMode.MIX;
+    private OfflineResource offlineResource = null;
+
+    private MySynthesizer synthesizer = null;
+    private TTSMassageListener synthesizerListener = new TTSMassageListener();
+
+
     /**
      * 这个方法被用于inputControl的fragment中
      * 在这个fragment中点按创建的手语识别消息都是新建的
@@ -79,13 +66,12 @@ public class MessageManager {
 
     private MessageManager() {
         messages_list = new ArrayList<>();
-
-
     }
 
     public static MessageManager getInstance() {
         return instance;
     }
+
 
     private int acquire_curr_id() {
         return messages_list.size();
@@ -159,9 +145,60 @@ public class MessageManager {
         noticeAllTargetMsgChange();
     }
 
+    public void initTTS(Context context) {
+        try {
+            LoggerProxy.printable(true); // 日志打印在logcat中
+            // 设置初始化参数
+            // 此处可以改为 含有您业务逻辑的SpeechSynthesizerListener的实现类
+            offlineResource = new OfflineResource(context, offlineVoice);
+            Map<String, String> params = initTTSParams();
+            // appId appKey secretKey 网站上您申请的应用获取。注意使用离线合成功能的话，需要应用中填写您app的包名。包名在build.gradle中获取。
+            InitConfig initConfig = new InitConfig(appId, appKey, secretKey, ttsMode, params, synthesizerListener);
+            synthesizer = new NonBlockSynthesizer(context, initConfig);
+
+        } catch (Exception ee) {
+            Log.e(TAG, "initTTS: 出现错误 " + ee);
+        }
+    }
+
+    /**
+     * 合成的参数，可以初始化时填写，也可以在合成前设置。
+     *
+     * @return
+     */
+    private Map<String, String> initTTSParams() {
+        Map<String, String> params = new HashMap<String, String>();
+        // 以下参数均为选填
+        // 设置在线发声音人： 0 普通女声（默认） 1 普通男声 2 特别男声 3 情感男声<度逍遥> 4 情感儿童声<度丫丫>
+        params.put(SpeechSynthesizer.PARAM_SPEAKER, "1");
+        // 设置合成的音量，0-9 ，默认 5
+        params.put(SpeechSynthesizer.PARAM_VOLUME, "9");
+        // 设置合成的语速，0-9 ，默认 5
+        params.put(SpeechSynthesizer.PARAM_SPEED, "5");
+        // 设置合成的语调，0-9 ，默认 5
+        params.put(SpeechSynthesizer.PARAM_PITCH, "5");
+
+        params.put(SpeechSynthesizer.PARAM_MIX_MODE, SpeechSynthesizer.MIX_MODE_HIGH_SPEED_SYNTHESIZE_WIFI);
+        // 该参数设置为TtsMode.MIX生效。即纯在线模式不生效。
+        // MIX_MODE_DEFAULT 默认 ，wifi状态下使用在线，非wifi离线。在线状态下，请求超时6s自动转离线
+        // MIX_MODE_HIGH_SPEED_SYNTHESIZE_WIFI wifi状态下使用在线，非wifi离线。在线状态下， 请求超时1.2s自动转离线
+        // MIX_MODE_HIGH_SPEED_NETWORK ， 3G 4G wifi状态下使用在线，其它状态离线。在线状态下，请求超时1.2s自动转离线
+        // MIX_MODE_HIGH_SPEED_SYNTHESIZE, 2G 3G 4G wifi状态下使用在线，其它状态离线。在线状态下，请求超时1.2s自动转离线
+
+        // 离线资源文件， 从assets目录中复制到临时目录，需要在initTTs方法前完成
+        // 声学模型文件路径 (离线引擎使用), 请确认下面两个文件存在
+        params.put(SpeechSynthesizer.PARAM_TTS_TEXT_MODEL_FILE,
+                offlineResource.getTextFilename());
+        params.put(SpeechSynthesizer.PARAM_TTS_SPEECH_MODEL_FILE,
+                offlineResource.getModelFilename());
+        return params;
+    }
+
+
+
     private void synthesizeVoice(String new_text, String history_text) {
         String voice_str = new_text.substring(history_text.length());
-        synthesizer.startSpeaking(voice_str, synthesizerListener);
+        synthesizer.speak(voice_str);
     }
 
 
@@ -194,8 +231,11 @@ public class MessageManager {
             return false;
         }
         try {
+            //初始化消息里的数据
             capture_state = true;
             message.setCaptureComplete(false);
+            message.setTextContent("");
+            //向外界告知开始手语识别了
             noticeAllTargetMsgSignCaptureStart();
             SocketConnectionManager.getInstance()
                     .sendMessage(buildSignRecognizeRequest(message.getMsgId()));
@@ -282,6 +322,12 @@ public class MessageManager {
         noticeAllTargetMsgChange();
     }
 
+
+    /**
+     * 以下是一系列使用观察者模式实现的回调类
+     * 当手语识别开始或者结束的时候 通过回调告知所有相关的对象
+     */
+
     public void addNewNoticeTarget(NoticeMessageChanged obj) {
         notice_list.add(obj);
     }
@@ -325,7 +371,6 @@ public class MessageManager {
     }
 
 
-    //dubug
 
     public interface NoticeMessageChanged {
         void onNewMessageAdd();

@@ -5,19 +5,15 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.github.scarecrow.signscognizing.R;
+import com.github.scarecrow.signscognizing.Utilities.MessageManager;
 import com.github.scarecrow.signscognizing.fragments.ArmbandSelectFragment;
 import com.github.scarecrow.signscognizing.fragments.ConversationDisplayFragment;
 import com.github.scarecrow.signscognizing.fragments.InfoDisplayFragment;
 import com.github.scarecrow.signscognizing.fragments.InputControlPanelFragment;
 import com.github.scarecrow.signscognizing.fragments.SettingFragment;
 import com.github.scarecrow.signscognizing.fragments.StartControlPanelFragment;
-import com.iflytek.cloud.InitListener;
-import com.iflytek.cloud.SpeechRecognizer;
-import com.iflytek.cloud.SpeechSynthesizer;
-import com.iflytek.cloud.SpeechUtility;
 
 public class MainActivity extends AppCompatActivity {
     // 各个fragment的代号 在切换fragment的时候可以由外部调用。
@@ -38,20 +34,16 @@ public class MainActivity extends AppCompatActivity {
         APP_CONTEXT = getApplicationContext();
         switchFragment(FRAGMENT_START_CONTROL);
         switchFragment(FRAGMENT_INFO_DISPLAY);
-        SpeechUtility.createUtility(getApplicationContext(), "appid=5a883f0c");
-        SpeechRecognizer.createRecognizer(getApplicationContext(), new InitListener() {
-            @Override
-            public void onInit(int code) {
-                Log.d("", "SpeechRecognizer init() code = " + code);
-            }
-        });
 
-        SpeechSynthesizer.createSynthesizer(getApplicationContext(), new InitListener() {
-            @Override
-            public void onInit(int i) {
-                Log.d("", "SpeechSynthesizer init() code = " + i);
-            }
-        });
+        MessageManager.getInstance().initTTS(getApplicationContext());
+
+//        SpeechUtility.createUtility(getApplicationContext(), "appid=5a883f0c");
+//        SpeechRecognizer.createRecognizer(getApplicationContext(), new InitListener() {
+//            @Override
+//            public void onInit(int code) {
+//                Log.d("", "SpeechRecognizer init() code = " + code);
+//            }
+//        });
 
     }
 

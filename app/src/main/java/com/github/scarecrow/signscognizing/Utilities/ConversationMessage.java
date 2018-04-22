@@ -2,6 +2,7 @@ package com.github.scarecrow.signscognizing.Utilities;
 
 /**
  * Created by Scarecrow on 2018/2/8.
+ * 交流信息的基类 交流信息有语音 手语以及文字三种
  */
 
 public abstract class ConversationMessage {
@@ -23,6 +24,10 @@ public abstract class ConversationMessage {
         return msg_id;
     }
 
+    public void setMsgId(int id) {
+        msg_id = id;
+    }
+
     public int getMsgType() {
         return msg_type;
     }
@@ -33,9 +38,5 @@ public abstract class ConversationMessage {
 
     protected void setTextContent(String content) {
         text_content = content;
-    }
-
-    public void setMsgId(int id) {
-        msg_id = id;
     }
 }

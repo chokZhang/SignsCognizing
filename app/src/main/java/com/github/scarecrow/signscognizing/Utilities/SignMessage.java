@@ -23,29 +23,28 @@ public class SignMessage extends ConversationMessage {
         sign_feedback_stauts = INITIAL;
     }
 
-    public void setSignFeedbackStatus(int stauts) {
-        sign_feedback_stauts = stauts;
-    }
-
-
     public int getSignFeedbackStatus() {
         return sign_feedback_stauts;
     }
 
-    public void setCaptureId(int capture_id) {
-        this.capture_id = capture_id;
+    public void setSignFeedbackStatus(int stauts) {
+        sign_feedback_stauts = stauts;
     }
 
     public int getCaptureId() {
         return capture_id;
     }
 
-    public void setCaptureComplete(boolean status) {
-        is_capture_complete = status;
+    public void setCaptureId(int capture_id) {
+        this.capture_id = capture_id;
     }
 
     public boolean isCaptureComplete() {
         return is_capture_complete;
+    }
+
+    public void setCaptureComplete(boolean status) {
+        is_capture_complete = status;
     }
 
 }
