@@ -23,6 +23,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name="com.baidu.speech.VoiceRecognitionService"
+            android:exported="false" />
+
+
+        <meta-data
+            android:name="com.baidu.speech.APP_ID"
+            android:value="11138165" />
+        <meta-data
+            android:name="com.baidu.speech.API_KEY"
+            android:value="atDLVSr4NFmDNPxPWHxWnPVS" />
+        <meta-data
+            android:name="com.baidu.speech.SECRET_KEY"
+            android:value="20da52346b042869be7cda3f8fb12cf5" />
+
     </application>
+
 
 </manifest>

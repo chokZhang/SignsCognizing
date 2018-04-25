@@ -64,7 +64,7 @@ public class SocketCommunicatorThread extends HandlerThread {
             request_body.accumulate("control", "end_connection");
             request_body.accumulate("data", "");
         } catch (Exception ee) {
-            Log.e(TAG, "disconnect: on build excption" + ee);
+            Log.e(TAG, "disconnect: on build request body exception" + ee);
             ee.printStackTrace();
         }
         communicator_handler
@@ -80,6 +80,7 @@ public class SocketCommunicatorThread extends HandlerThread {
         } catch (Exception ee) {
             Log.e(TAG, "disconnect: error: " + ee);
             ee.printStackTrace();
+            quit();
         }
         quit();
     }

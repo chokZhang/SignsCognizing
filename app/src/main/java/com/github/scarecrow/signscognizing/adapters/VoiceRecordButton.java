@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
-import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ImageView;
@@ -32,6 +31,17 @@ public class VoiceRecordButton extends AppCompatImageButton {
             RECORD_OFF = -9;
 
     private Thread record_timer_thread;
+    private ExtAudioRecorder recorder = new ExtAudioRecorder(AudioRecorderConfiguration
+            .createDefaultSetting()
+            .handler(recorder_ui_handler)
+            .build());
+    private double recording_time = 0.0,
+            voice_value = 0.0;
+    private int recorder_state = RECORD_OFF;
+    private float init_y;
+    private boolean is_cancel = false;
+    private Dialog recorder_dialog;
+    private ImageView dialog_img;
     @SuppressLint("HandlerLeak")
     private Handler recorder_ui_handler = new Handler() {
         @Override
@@ -40,20 +50,27 @@ public class VoiceRecordButton extends AppCompatImageButton {
             setRecorderValueImg(voice_value);
         }
     };
+    private TextView dialog_text;
+    /**
+     * 计时器 用于记录录音长度
+     */
+    private Runnable timer = new Runnable() {
+        @Override
+        public void run() {
+            recording_time = 0;
 
-    private ExtAudioRecorder recorder = new ExtAudioRecorder(AudioRecorderConfiguration
-            .createDefaultSetting()
-            .handler(recorder_ui_handler)
-            .build());
+            while (recorder_state == RECORD_ON &&
+                    !Thread.currentThread().isInterrupted()) {
+                try {
+                    Thread.sleep(100);
+//                    Log.d(TAG, "timer: " + recording_time);
+                    recording_time += 0.1;
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+    };
 
-
-    private double recording_time = 0.0,
-            voice_value = 0.0;
-    private int recorder_state = RECORD_OFF;
-    private float init_y;
-    private boolean is_cancel = false;
-
-    private Dialog recorder_dialog;
 
     public VoiceRecordButton(Context context) {
         super(context);
@@ -62,11 +79,9 @@ public class VoiceRecordButton extends AppCompatImageButton {
     public VoiceRecordButton(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
-
     public VoiceRecordButton(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -125,9 +140,6 @@ public class VoiceRecordButton extends AppCompatImageButton {
         return true;
     }
 
-    private ImageView dialog_img;
-    private TextView dialog_text;
-
     private void updateVoiceDialog(boolean is_can_cancel) {
         if (recorder_dialog == null) {
             recorder_dialog = new Dialog(getContext(), R.style.Theme_AppCompat_Dialog);
@@ -149,28 +161,6 @@ public class VoiceRecordButton extends AppCompatImageButton {
             recorder_dialog.show();
 
     }
-
-
-    /**
-     * 计时器 用于记录录音长度
-     */
-    private Runnable timer = new Runnable() {
-        @Override
-        public void run() {
-            recording_time = 0;
-
-            while (recorder_state == RECORD_ON &&
-                    !Thread.currentThread().isInterrupted()) {
-                try {
-                    Thread.sleep(100);
-                    Log.d(TAG, "timer: " + recording_time);
-                    recording_time += 0.1;
-                } catch (InterruptedException e) {
-                }
-            }
-        }
-    };
-
 
     private void setRecorderValueImg(double voiceValue) {
         voiceValue *= 10;

@@ -28,104 +28,33 @@ import static android.content.ContentValues.TAG;
 
 public class ExtAudioRecorder {
 
+    private static String fileFolder = Environment.getExternalStorageDirectory()
+            .getPath() + "/sign_recognize_voice_cache/";
     private AudioRecorderConfiguration configuration;
-
-
-    public ExtAudioRecorder(AudioRecorderConfiguration configuration) {
-        this.configuration = configuration;
-
-        if (configuration.isUncompressed()) {
-            init(configuration.isUncompressed(),
-                    configuration.getSource(),
-                    configuration.getRate(),
-                    configuration.getChannelConfig(),
-                    configuration.getFormat());
-        } else {
-            int i = 0;
-            do {
-                init(configuration.isUncompressed(),
-                        configuration.getSource(),
-                        AudioRecorderConfiguration.SAMPLE_RATES[i],
-                        configuration.getChannelConfig(),
-                        configuration.getFormat());
-
-            }
-            while ((++i < AudioRecorderConfiguration.SAMPLE_RATES.length) & !(getState() == ExtAudioRecorder.State.INITIALIZING));
-        }
-    }
-
-    /**
-     * 录音的状态
-     */
-    public enum State {
-        /**
-         * 录音初始化
-         */
-        INITIALIZING,
-        /**
-         * 已准备好录音
-         */
-        READY,
-        /**
-         * 录音中
-         */
-        RECORDING,
-        /**
-         * 录音生了错误
-         */
-        ERROR,
-        /**
-         * 停止录音
-         */
-        STOPPED
-    }
-
     // 不压缩将使用这个进行录音
     private AudioRecord audioRecorder = null;
-
     // 压缩将使用这进行录音
     private MediaRecorder mediaRecorder = null;
-
     // 当前的振幅 (只有在未压缩的模式下)
     private int cAmplitude = 0;
-
     // 录音状态
     private State state;
-
     // 文件 (只有在未压缩的模式下)
     private RandomAccessFile randomAccessWriter;
-
     private int bufferSize;
-
     // 录音 通知周期(只有在未压缩的模式下)
     private int framePeriod;
     // 输出的字节(只有在未压缩的模式下)
     private byte[] buffer;
-
     private short samples;
     private short channels;
-
     // 写入头文件的字节数(只有在未压缩的模式下)
     // after stop() is called, this size is written to the header/data chunk in
     // the wave file
     private int payloadSize;
     //录音的开始时间
     private long startTime;
-
     private String filePath;
-
-    private static String fileFolder = Environment.getExternalStorageDirectory()
-            .getPath() + "/sign_recognize_voice_cache/";
-
-    /**
-     * 返回录音的状态
-     *
-     * @return 录音的状态
-     */
-    public State getState() {
-        return state;
-    }
-
     /*
      *
      * Method used for recording.
@@ -166,6 +95,38 @@ public class ExtAudioRecorder {
             // NOT USED
         }
     };
+
+    public ExtAudioRecorder(AudioRecorderConfiguration configuration) {
+        this.configuration = configuration;
+
+        if (configuration.isUncompressed()) {
+            init(configuration.isUncompressed(),
+                    configuration.getSource(),
+                    configuration.getRate(),
+                    configuration.getChannelConfig(),
+                    configuration.getFormat());
+        } else {
+            int i = 0;
+            do {
+                init(configuration.isUncompressed(),
+                        configuration.getSource(),
+                        AudioRecorderConfiguration.SAMPLE_RATES[i],
+                        configuration.getChannelConfig(),
+                        configuration.getFormat());
+
+            }
+            while ((++i < AudioRecorderConfiguration.SAMPLE_RATES.length) & !(getState() == ExtAudioRecorder.State.INITIALIZING));
+        }
+    }
+
+    /**
+     * 返回录音的状态
+     *
+     * @return 录音的状态
+     */
+    public State getState() {
+        return state;
+    }
 
     /**
      * 默认的构造方法，如果压缩录音，剩下的参数可以为0.这个方法不会抛出异常，但是会设置状态为 {@link State#ERROR}
@@ -234,7 +195,6 @@ public class ExtAudioRecorder {
         }
     }
 
-
     /**
      * 设置输出的文件路径
      */
@@ -265,7 +225,6 @@ public class ExtAudioRecorder {
         return formatter.format(curDate);
     }
 
-
     /**
      * Returns the largest amplitude sampled since the last call to this method.
      *
@@ -289,7 +248,6 @@ public class ExtAudioRecorder {
             return 0;
         }
     }
-
 
     /**
      * 准备录音的录音机, 如果 state 不是 {@link State#INITIALIZING} 或文件路径为null
@@ -491,7 +449,6 @@ public class ExtAudioRecorder {
                     file.delete();
                     return "文件长度为0";
                 } else {
-                    int time = (int) ((new Date()).getTime() - this.startTime) / 1000;
                     return filePath;
                 }
             } else {
@@ -511,7 +468,7 @@ public class ExtAudioRecorder {
                     while (true) {
                         if (state == State.RECORDING) {
                             double curr_amplitude = getMaxAmplitude() / 20;
-                            Log.d(TAG, "run: curr_amplitude: " + curr_amplitude);
+//                            Log.d(TAG, "run: curr_amplitude: " + curr_amplitude);
                             configuration.getHandler().obtainMessage(0, curr_amplitude)
                                     .sendToTarget();
                             SystemClock.sleep(100);
@@ -529,6 +486,32 @@ public class ExtAudioRecorder {
      */
     private short getShort(byte argB1, byte argB2) {
         return (short) (argB1 | (argB2 << 8));
+    }
+
+    /**
+     * 录音的状态
+     */
+    public enum State {
+        /**
+         * 录音初始化
+         */
+        INITIALIZING,
+        /**
+         * 已准备好录音
+         */
+        READY,
+        /**
+         * 录音中
+         */
+        RECORDING,
+        /**
+         * 录音生了错误
+         */
+        ERROR,
+        /**
+         * 停止录音
+         */
+        STOPPED
     }
 
 

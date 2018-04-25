@@ -161,6 +161,10 @@ public class MessageManager {
         }
     }
 
+    public void releaseTTS() {
+        synthesizer.release();
+    }
+
     /**
      * 合成的参数，可以初始化时填写，也可以在合成前设置。
      *

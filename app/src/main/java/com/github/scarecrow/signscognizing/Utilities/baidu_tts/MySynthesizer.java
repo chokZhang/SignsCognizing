@@ -70,7 +70,7 @@ public class MySynthesizer {
             return false;
         }
         // 此时可以调用 speak和synthesize方法
-        Log.d(TAG, "init: 合成引擎初始化成功");
+        Log.d(TAG, "init: 语音合成引擎初始化成功");
         return true;
     }
 
