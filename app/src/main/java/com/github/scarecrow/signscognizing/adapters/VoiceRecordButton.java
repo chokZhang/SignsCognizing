@@ -31,10 +31,7 @@ public class VoiceRecordButton extends AppCompatImageButton {
             RECORD_OFF = -9;
 
     private Thread record_timer_thread;
-    private ExtAudioRecorder recorder = new ExtAudioRecorder(AudioRecorderConfiguration
-            .createDefaultSetting()
-            .handler(recorder_ui_handler)
-            .build());
+
     private double recording_time = 0.0,
             voice_value = 0.0;
     private int recorder_state = RECORD_OFF;
@@ -50,6 +47,11 @@ public class VoiceRecordButton extends AppCompatImageButton {
             setRecorderValueImg(voice_value);
         }
     };
+
+    private ExtAudioRecorder recorder = new ExtAudioRecorder(AudioRecorderConfiguration
+            .createDefaultSetting()
+            .handler(recorder_ui_handler)
+            .build());
     private TextView dialog_text;
     /**
      * 计时器 用于记录录音长度

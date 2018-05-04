@@ -2,7 +2,6 @@ package com.github.scarecrow.signscognizing.Utilities.baidu_tts;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.os.Environment;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,12 +17,9 @@ public class FileUtil {
     // 创建一个临时目录，用于复制临时文件，如assets目录下的离线资源文件
     public static String createTmpDir(Context context) {
         String sampleDir = "baiduTTS";
-        String tmpDir = Environment.getExternalStorageDirectory().toString() + "/" + sampleDir;
+        String tmpDir = context.getExternalFilesDir(sampleDir).toString() + "/" + sampleDir;
         if (!FileUtil.makeDir(tmpDir)) {
-            tmpDir = context.getExternalFilesDir(sampleDir).getAbsolutePath();
-            if (!FileUtil.makeDir(sampleDir)) {
                 throw new RuntimeException("create model resources dir failed :" + tmpDir);
-            }
         }
         return tmpDir;
     }
@@ -35,7 +31,8 @@ public class FileUtil {
 
     public static boolean makeDir(String dirPath) {
         File file = new File(dirPath);
-        if (!file.exists()) {
+        boolean exist_status = file.exists();
+        if (!exist_status) {
             return file.mkdirs();
         } else {
             return true;

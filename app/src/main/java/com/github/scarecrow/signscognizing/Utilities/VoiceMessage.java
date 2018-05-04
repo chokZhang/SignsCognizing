@@ -46,18 +46,6 @@ public class VoiceMessage extends ConversationMessage {
             asrEventManager.unregisterListener(asr_result_listener);
         }
     };
-    private Runnable trans_task = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                recognizePcmfileByte();
-            } catch (Exception ee) {
-                Log.e(TAG, "transVoice2Text: " + ee);
-                ee.printStackTrace();
-            }
-
-        }
-    };
 
     /**
      * 语音消息录音完毕后 会将语音文件的URL传入
@@ -165,8 +153,8 @@ public class VoiceMessage extends ConversationMessage {
     }
 
     /**
+     * 科大讯飞语音包使用的各种模拟音频输入识别的方法 已废弃
      * 如果直接从音频文件识别，需要模拟真实的音速，防止音频队列的堵塞
-     *
      * @throws InterruptedException sleep 方法
      */
     private void recognizePcmfileByte() throws InterruptedException {
