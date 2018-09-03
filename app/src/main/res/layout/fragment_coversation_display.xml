@@ -2,6 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@drawable/split_board_right"
     android:layout_height="match_parent">
 
     <android.support.v7.widget.RecyclerView
@@ -10,7 +12,7 @@
         android:padding="5dp"
         android:id="@+id/conversation_display_rv"
         android:layout_weight="1"
-        android:background="@drawable/border_bottom_bg_img">
+        android:background="#00000000">
 
     </android.support.v7.widget.RecyclerView>
 
@@ -19,7 +21,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="10dp"
-        android:background="#6fffffff">
+        android:background="#00ffffff">
 
         <EditText
             android:layout_width="0dp"

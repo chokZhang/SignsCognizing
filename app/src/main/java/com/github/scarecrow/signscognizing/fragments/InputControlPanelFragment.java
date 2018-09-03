@@ -6,10 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.ImageButton;
-import android.widget.Switch;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.scarecrow.signscognizing.R;
@@ -48,7 +45,7 @@ public class InputControlPanelFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         View view = getView();
         //返回button
-        final Button bt = view.findViewById(R.id.button_input_panel_back);
+        final ImageView bt = view.findViewById(R.id.button_input_panel_back);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -56,33 +53,14 @@ public class InputControlPanelFragment extends Fragment {
                 SocketConnectionManager.getInstance().disconnect();
                 MainActivity activity = (MainActivity) getActivity();
                 activity.switchFragment(MainActivity.FRAGMENT_ARMBANDS_SELECT);
-                activity.switchFragment(MainActivity.FRAGMENT_INFO_DISPLAY);
+                activity.switchFragment(MainActivity.FRAGMENT_SPLIT_BOARD);
             }
         });
 
-        final TextView textView = view.findViewById(R.id.recognize_model_display);
-        textView.setText("离线识别");
-        Switch switcher = view.findViewById(R.id.recognize_model_switch);
-        switcher.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    Log.d(TAG, "onCheckedChanged: 切换至在线识别模式");
-                    textView.setText("在线识别");
-                    SocketConnectionManager.getInstance()
-                            .sendMessage(buildRecognizeModeSwitchRequest("online"));
-                } else {
-                    Log.d(TAG, "onCheckedChanged: 切换至离线识别模式");
-                    textView.setText("离线识别");
-                    SocketConnectionManager.getInstance()
-                            .sendMessage(buildRecognizeModeSwitchRequest("offline"));
-                }
-            }
-        });
 
 
         //手语输入
-        final ImageButton bt_cap = view.findViewById(R.id.button_input_panel_sign_start);
+        final ImageView bt_cap = view.findViewById(R.id.button_input_panel_sign_start);
         final TextView cap_state = view.findViewById(R.id.sign_input_state_tv);
         bt_cap.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,14 +71,18 @@ public class InputControlPanelFragment extends Fragment {
                 if (!capture_state) {
                     boolean res = MessageManager.getInstance()
                             .requestCaptureSign();
-                    if (res)
+                    if (res) {
+                        bt_cap.setImageDrawable(getResources().getDrawable(R.drawable.icon_sign_recog_on));
                         cap_state.setText("结束手语采集");
+                    }
 
                 } else {
                     boolean res = MessageManager.getInstance()
                             .stopSignRecognize();
-                    if (res)
+                    if (res) {
+                        bt_cap.setImageDrawable(getResources().getDrawable(R.drawable.icon_sign_recog_off));
                         cap_state.setText("开始手语采集");
+                    }
                 }
             }
         });

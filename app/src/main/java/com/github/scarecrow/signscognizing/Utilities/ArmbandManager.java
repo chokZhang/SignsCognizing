@@ -47,25 +47,7 @@ public class ArmbandManager {
     }
 
     public void updateArmbandsList() {
-//        new FetchArmbandsList().execute();
-        armband_list.add(new Armband("{\n" +
-                "\"armband_id\": \"armband 0\",\n" +
-                "\"armband_status\": 0\n" +
-                "}"));
-        armband_list.add(new Armband("{\n" +
-                "\"armband_id\": \"armband 0\",\n" +
-                "\"armband_status\": 0\n" +
-                "}"));
-        armband_list.add(new Armband("{\n" +
-                "\"armband_id\": \"armband 0\",\n" +
-                "\"armband_status\": 0\n" +
-                "}"));
-        armband_list.add(new Armband("{\n" +
-                "\"armband_id\": \"armband 0\",\n" +
-                "\"armband_status\": 0\n" +
-                "}"));
-        updateCallback.noticeUpdateComplete(armband_list);
-
+        new FetchArmbandsList().execute();
     }
 
     private void parseArmbandsListJSON(String armband_list_JSON) {
