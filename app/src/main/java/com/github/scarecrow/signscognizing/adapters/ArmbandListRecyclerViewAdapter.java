@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
@@ -68,8 +67,9 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
     @Override
     public void onBindViewHolder(final ArmbandListItemViewHolder holder, int position) {
         final Armband armband = armband_list.get(position);
-        holder.info_display.setText(armband.toString());
-        holder.item_body.setBackgroundResource(R.color.block_white);
+        holder.armband_name.setText(armband.getArmbandId());
+        holder.armband_stat.setText(armband.getArmbandStatus());
+        holder.item_body.setBackgroundResource(R.color.lucency);
         holder.ping_armband.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,7 +85,7 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
             holder.select_state.setText("");
 //            双手模式时 使用checkbox以及count方式选择手环
 //            如果手环已被占用 禁用check box
-            if (armband.getArmbandStatus() == Armband.ARMBAND_OCCURPIED) {
+            if (armband.getArmbandStatusCode() == Armband.ARMBAND_OCCURPIED) {
                 holder.select_box.setEnabled(false);
                 holder.select_state.setText("手环已被占用");
                 return;
@@ -112,7 +112,7 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
         } else {
 //            单手模式时 使用点击list里的item方式
             holder.both_hand_check_view.setVisibility(View.GONE);
-            if (armband.getArmbandStatus() == Armband.ARMBAND_OCCURPIED) {
+            if (armband.getArmbandStatusCode() == Armband.ARMBAND_OCCURPIED) {
                 holder.item_body.setBackgroundResource(R.color.dark_alpha);
                 return;
             }
@@ -210,19 +210,22 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
 
     static class ArmbandListItemViewHolder extends RecyclerView.ViewHolder {
         public LinearLayout item_body, both_hand_check_view;
-        public TextView info_display;
         public CheckBox select_box;
+        public TextView armband_stat;
+        public TextView armband_name;
         public TextView select_state;
-        public Button ping_armband;
+        public TextView ping_armband;
 
         public ArmbandListItemViewHolder(View item_view) {
             super(item_view);
             item_body = (LinearLayout) item_view;
-            info_display = item_view.findViewById(R.id.armband_list_item_info_textview);
             select_box = item_view.findViewById(R.id.armband_select_checkbox);
             select_state = item_view.findViewById(R.id.textview_select_state);
+            armband_name = item_view.findViewById(R.id.armband_list_band_id_textview);
+            armband_stat = item_view.findViewById(R.id.armband_list_band_stats_textview);
             both_hand_check_view = item_view.findViewById(R.id.both_hand_check_view);
             ping_armband = item_view.findViewById(R.id.button_ping_armband);
+
         }
     }
 

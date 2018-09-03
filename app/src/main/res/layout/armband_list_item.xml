@@ -1,34 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="130dp"
-    android:background="@drawable/border_bottom_bg_img"
+    android:layout_height="100dp"
+    android:background="#00000000"
     android:orientation="horizontal"
     android:paddingBottom="5dp">
 
     <ImageView
         android:layout_width="90dp"
-        android:layout_height="match_parent"
+        android:layout_height="90dp"
         android:contentDescription="@string/选择手环"
-        android:padding="10dp"
         android:scaleType="centerCrop"
+        android:layout_gravity="center"
         android:src="@drawable/myo_icon" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#3effffff"
+        android:gravity="center"
         android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/armband_list_item_info_textview"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#00ffffff"
-            android:gravity="start"
-            android:textColor="#000000"
-            android:textSize="17sp" />
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/armband_list_band_id_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:padding="1dp"
+                android:textStyle="normal"
+                android:textColor="#FFFFFF"
+                android:textSize="23sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/armband_list_band_stats_textview"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:padding="1dp"
+                    android:textStyle="normal"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/button_ping_armband"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    android:layout_gravity="end"
+                    android:textSize="18sp"
+                    android:gravity="center"
+                    android:textColor="#ffffff"
+                    android:text="Ping" />
+
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@drawable/horizontal_line"/>
+        </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -49,7 +86,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:background="#3effffff"
                     android:gravity="end"
                     android:textColor="#000000"
                     android:textSize="15sp" />
@@ -60,12 +96,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="end" />
             </LinearLayout>
-            <Button
-                android:id="@+id/button_ping_armband"
-                android:layout_width="80dp"
-                android:layout_height="40dp"
-                android:layout_gravity="end"
-                android:text="ping" />
+
         </LinearLayout>
     </LinearLayout>
 

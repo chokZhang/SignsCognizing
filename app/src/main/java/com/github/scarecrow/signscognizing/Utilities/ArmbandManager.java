@@ -6,12 +6,9 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -50,7 +47,25 @@ public class ArmbandManager {
     }
 
     public void updateArmbandsList() {
-        new FetchArmbandsList().execute();
+//        new FetchArmbandsList().execute();
+        armband_list.add(new Armband("{\n" +
+                "\"armband_id\": \"armband 0\",\n" +
+                "\"armband_status\": 0\n" +
+                "}"));
+        armband_list.add(new Armband("{\n" +
+                "\"armband_id\": \"armband 0\",\n" +
+                "\"armband_status\": 0\n" +
+                "}"));
+        armband_list.add(new Armband("{\n" +
+                "\"armband_id\": \"armband 0\",\n" +
+                "\"armband_status\": 0\n" +
+                "}"));
+        armband_list.add(new Armband("{\n" +
+                "\"armband_id\": \"armband 0\",\n" +
+                "\"armband_status\": 0\n" +
+                "}"));
+        updateCallback.noticeUpdateComplete(armband_list);
+
     }
 
     private void parseArmbandsListJSON(String armband_list_JSON) {

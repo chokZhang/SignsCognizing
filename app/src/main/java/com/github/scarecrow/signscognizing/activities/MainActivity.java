@@ -14,6 +14,7 @@ import com.github.scarecrow.signscognizing.fragments.ConversationDisplayFragment
 import com.github.scarecrow.signscognizing.fragments.InfoDisplayFragment;
 import com.github.scarecrow.signscognizing.fragments.InputControlPanelFragment;
 import com.github.scarecrow.signscognizing.fragments.SettingFragment;
+import com.github.scarecrow.signscognizing.fragments.ShowSplitBoardFragment;
 import com.github.scarecrow.signscognizing.fragments.StartControlPanelFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -22,8 +23,9 @@ public class MainActivity extends AppCompatActivity {
                             FRAGMENT_INPUT_CONTROL = 25,
                             FRAGMENT_ARMBANDS_SELECT = 46,
                             FRAGMENT_CONVERSATION_DISPLAY = -289,
-            FRAGMENT_INFO_DISPLAY = -29,
-            FRAGMENT_SETTING = 30;
+                            FRAGMENT_INFO_DISPLAY = -29,
+                            FRAGMENT_SETTING = 30,
+                            FRAGMENT_SPLIT_BOARD = -33;
 
     public static Context APP_CONTEXT;
 
@@ -93,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
             case FRAGMENT_SETTING:
                 fragment = new SettingFragment();
                 break;
+            case FRAGMENT_SPLIT_BOARD:
+                fragment = new ShowSplitBoardFragment();
+                break ;
             default:
                 fragment = new InfoDisplayFragment();
                 break;

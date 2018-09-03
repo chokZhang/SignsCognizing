@@ -4,15 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/main_page_background"
+    android:background="@drawable/main_page_background"
     android:orientation="horizontal"
-    tools:context="com.github.scarecrow.signscognizing.activities.MainActivity">
+    tools:context="com.github.scarecrow.signscognizing.activities.MainActivity"
+    android:baselineAligned="false">
+
 
     <LinearLayout
         android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:layout_weight="1.41"
-        android:padding="10dp">
+        android:layout_weight="1.41">
         <FrameLayout
             android:id="@+id/control_panel_fragment_container"
             android:layout_width="match_parent"

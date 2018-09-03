@@ -5,10 +5,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
 
-import com.github.scarecrow.signscognizing.activities.MainActivity;
 import com.github.scarecrow.signscognizing.R;
+import com.github.scarecrow.signscognizing.activities.MainActivity;
 
 /**
  * Created by Scarecrow on 2018/2/5.
@@ -40,11 +40,15 @@ public class StartControlPanelFragment extends Fragment {
         View fragment_view = getView();
         final MainActivity parent_activity = (MainActivity) getActivity();
 
-        Button bt = fragment_view.findViewById(R.id.button_start_conversation);
+        assert fragment_view != null;
+        assert parent_activity != null;
+
+        ImageView bt = fragment_view.findViewById(R.id.button_start_conversation);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 parent_activity.switchFragment(MainActivity.FRAGMENT_ARMBANDS_SELECT);
+                parent_activity.switchFragment(MainActivity.FRAGMENT_SPLIT_BOARD);
             }
         });
 

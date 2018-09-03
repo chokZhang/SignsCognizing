@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.github.scarecrow.signscognizing.R;
@@ -107,7 +108,7 @@ public class ArmbandSelectFragment extends Fragment {
 
 
         final MainActivity parent_activity = (MainActivity) getActivity();
-        Button bt = fragment_view.findViewById(R.id.button_armband_select_refresh);
+        ImageView bt = fragment_view.findViewById(R.id.button_armband_select_refresh);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -120,6 +121,7 @@ public class ArmbandSelectFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 parent_activity.switchFragment(MainActivity.FRAGMENT_START_CONTROL);
+                parent_activity.switchFragment(MainActivity.FRAGMENT_INFO_DISPLAY);
             }
         });
     }

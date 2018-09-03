@@ -24,7 +24,7 @@ import static com.github.scarecrow.signscognizing.Utilities.SocketCommunicatorTh
 public class Armband {
 
     public static final int ARMBAND_READY = -1,
-            ARMBAND_OCCURPIED = -2;
+                            ARMBAND_OCCURPIED = -2;
     /**
      * 0 未匹配
      * 1 作为左手
@@ -75,7 +75,7 @@ public class Armband {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
                 if (response.isSuccessful()) {
                     Log.d(TAG, "ping: ping armband successful");
                 }
@@ -83,8 +83,17 @@ public class Armband {
         });
     }
 
-    public int getArmbandStatus() {
+    public int getArmbandStatusCode() {
         return armband_occupy_status;
+    }
+
+    public String getArmbandStatus(){
+        String armband_status_str;
+        if (armband_occupy_status == ARMBAND_OCCURPIED)
+            armband_status_str = "已被其他终端使用";
+        else
+            armband_status_str = "就绪";
+        return armband_status_str;
     }
 
     public String getArmbandId() {
