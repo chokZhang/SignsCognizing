@@ -7,8 +7,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.github.scarecrow.signscognizing.R;
 import com.github.scarecrow.signscognizing.Utilities.MessageManager;
@@ -72,7 +72,7 @@ public class ConversationDisplayFragment extends Fragment {
 
         });
         //发送消息按钮
-        Button bt = view.findViewById(R.id.button_text_send);
+        ImageView bt = view.findViewById(R.id.button_text_send);
         final EditText editText = view.findViewById(R.id.conversation_text_input);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,8 +84,6 @@ public class ConversationDisplayFragment extends Fragment {
         });
 
 
-//        MessageManager.getInstance()
-//                .sampleDisplayCreate();
 
     }
 

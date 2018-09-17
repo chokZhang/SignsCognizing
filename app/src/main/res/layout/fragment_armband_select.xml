@@ -7,97 +7,117 @@
     android:padding="15dp"
     android:background="#00FFFFFF">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="15dp"
-        android:layout_marginBottom="10dp"
-        android:gravity="start">
+        android:layout_marginLeft="7dp"
+        android:layout_marginBottom="7dp"
+        android:gravity="start"
+        android:layout_marginStart="5dp">
         <ImageView
-            android:layout_width="86dp"
-            android:layout_height="29dp"
+            android:layout_width="70dp"
+            android:layout_height="23dp"
             android:background="@drawable/button_return_on_arm_slct"
             android:id="@+id/button_armband_select_return" />
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="10dp"
-        android:background="#00FFFFFF">
-
-        <TextView
-            android:layout_width="match_parent"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="30dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/选择手环"
-            android:textColor="#FFFFFF"
-            android:paddingBottom="6dp"
-            android:textSize="30sp" />
+            android:orientation="vertical">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:typeface="sans"
-            android:textSize="18sp"
-            android:textStyle="normal"
-            android:text="@string/点击手环进行连接"
-            android:paddingBottom="7dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:background="#00FFFFFF">
 
-        <ImageView
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/选择手环"
+                    android:textColor="#FFFFFF"
+                    android:paddingBottom="6dp"
+                    android:textSize="30sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:typeface="sans"
+                    android:textSize="18sp"
+                    android:textStyle="normal"
+                    android:text="@string/点击手环进行连接"
+                    android:paddingBottom="7dp"/>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="5dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/horizontal_line"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:background="@drawable/horizontal_line"/>
+            android:layout_height="match_parent"
+            android:layout_gravity="end">
+
+            <ImageView
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_marginTop="360dp"
+                android:layout_marginLeft="130dp"
+                android:layout_marginStart="130dp"
+                android:background="@drawable/armband_logo_background"/>
+
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/armbands_list_rv"
+                android:layout_width="match_parent"
+                android:layout_height="320dp"
+                android:layout_marginTop="10dp"
+                android:padding="5dp">
+
+            </android.support.v7.widget.RecyclerView>
+
+            <ImageView
+                android:id="@+id/button_armband_select_refresh"
+                android:layout_marginLeft="150dp"
+                android:layout_width="77dp"
+                android:layout_height="27dp"
+                android:layout_marginTop="360dp"
+                android:background="@drawable/button_refresh"
+                android:layout_marginStart="150dp" />
+
+            <Button
+                android:id="@+id/button_armband_select_confirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:text="@string/确定"
+                android:visibility="gone" />
+
+
+
+        </FrameLayout>
+
+
     </LinearLayout>
 
 
 
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="end">
-
-        <ImageView
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_marginTop="360dp"
-            android:layout_marginLeft="130dp"
-            android:layout_marginStart="130dp"
-            android:background="@drawable/armband_logo_background"/>
-
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/armbands_list_rv"
-            android:layout_width="match_parent"
-            android:layout_height="320dp"
-            android:layout_marginTop="10dp"
-            android:padding="5dp">
-
-        </android.support.v7.widget.RecyclerView>
-
-        <ImageView
-            android:id="@+id/button_armband_select_refresh"
-            android:layout_marginLeft="150dp"
-            android:layout_width="77dp"
-            android:layout_height="27dp"
-            android:layout_marginTop="360dp"
-            android:background="@drawable/button_refresh"
-            android:layout_marginStart="150dp" />
-
-        <Button
-            android:id="@+id/button_armband_select_confirm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:text="@string/确定"
-            android:visibility="gone" />
-
-
-
-    </FrameLayout>
 
 
 </LinearLayout>

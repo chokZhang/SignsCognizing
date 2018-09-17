@@ -46,7 +46,7 @@ public class MessageManager {
     private String appKey = "atDLVSr4NFmDNPxPWHxWnPVS";
     private String secretKey = "20da52346b042869be7cda3f8fb12cf5";
     // TtsMode.MIX; 离在线融合，在线优先； TtsMode.ONLINE 纯在线； 没有纯离线
-    private TtsMode ttsMode = TtsMode.MIX;
+    private TtsMode ttsMode = TtsMode.ONLINE; //目前SDK存在bug 当设置为MIX模式时会出现错误
     private OfflineResource offlineResource = null;
 
     private MySynthesizer synthesizer = null;
@@ -182,7 +182,7 @@ public class MessageManager {
         // 设置合成的语调，0-9 ，默认 5
         params.put(SpeechSynthesizer.PARAM_PITCH, "5");
 
-        params.put(SpeechSynthesizer.PARAM_MIX_MODE, SpeechSynthesizer.MIX_MODE_HIGH_SPEED_SYNTHESIZE_WIFI);
+        params.put(SpeechSynthesizer.PARAM_MIX_MODE, SpeechSynthesizer.MIX_MODE_HIGH_SPEED_SYNTHESIZE);
         // 该参数设置为TtsMode.MIX生效。即纯在线模式不生效。
         // MIX_MODE_DEFAULT 默认 ，wifi状态下使用在线，非wifi离线。在线状态下，请求超时6s自动转离线
         // MIX_MODE_HIGH_SPEED_SYNTHESIZE_WIFI wifi状态下使用在线，非wifi离线。在线状态下， 请求超时1.2s自动转离线

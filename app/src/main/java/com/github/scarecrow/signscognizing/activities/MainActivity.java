@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("", "SpeechRecognizer init() code = " + code);
             }
         });
-        Log.e("", "onCreate: " + speechRecognizer);
+        Log.d("", "onCreate: " + speechRecognizer);
 
         MessageManager.getInstance().initTTS(getApplicationContext());
 

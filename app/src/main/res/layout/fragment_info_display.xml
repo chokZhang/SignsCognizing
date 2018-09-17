@@ -13,11 +13,14 @@
         android:layout_height="match_parent"
         android:gravity="bottom"
         android:id='@+id/show_welcome_info'
+        android:paddingRight="15dp"
+        android:paddingEnd="15dp"
         android:orientation="vertical">
 
         <ImageView
             android:layout_width="350dp"
             android:layout_height="143dp"
+
             android:background="@drawable/welcome_slogen"/>
     </LinearLayout>
 

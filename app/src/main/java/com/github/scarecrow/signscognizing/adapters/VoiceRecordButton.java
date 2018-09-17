@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -25,7 +24,7 @@ import static android.content.ContentValues.TAG;
  * 仿微信可通过手势控制的音频录制按钮
  */
 
-public class VoiceRecordButton extends AppCompatImageButton {
+public class VoiceRecordButton extends android.support.v7.widget.AppCompatImageView {
 
     private static final int RECORD_ON = -5,
             RECORD_OFF = -9;
@@ -168,32 +167,12 @@ public class VoiceRecordButton extends AppCompatImageButton {
         voiceValue *= 10;
         if (voiceValue < 600.0) {
             dialog_img.setImageResource(R.mipmap.record_animate_01);
-        } else if (voiceValue > 600.0 && voiceValue < 1000.0) {
+        } else if (voiceValue > 600.0 && voiceValue < 2000.0) {
             dialog_img.setImageResource(R.mipmap.record_animate_02);
-        } else if (voiceValue > 1000.0 && voiceValue < 1200.0) {
+        } else if (voiceValue > 2000.0 && voiceValue < 3500.0) {
             dialog_img.setImageResource(R.mipmap.record_animate_03);
-        } else if (voiceValue > 1200.0 && voiceValue < 1400.0) {
+        } else if (voiceValue > 3500.0 ) {
             dialog_img.setImageResource(R.mipmap.record_animate_04);
-        } else if (voiceValue > 1400.0 && voiceValue < 1600.0) {
-            dialog_img.setImageResource(R.mipmap.record_animate_05);
-        } else if (voiceValue > 1600.0 && voiceValue < 1800.0) {
-            dialog_img.setImageResource(R.mipmap.record_animate_06);
-        } else if (voiceValue > 1800.0 && voiceValue < 2000.0) {
-            dialog_img.setImageResource(R.mipmap.record_animate_07);
-        } else if (voiceValue > 2000.0 && voiceValue < 3000.0) {
-            dialog_img.setImageResource(R.mipmap.record_animate_08);
-        } else if (voiceValue > 3000.0 && voiceValue < 4000.0) {
-            dialog_img.setImageResource(R.mipmap.record_animate_09);
-        } else if (voiceValue > 4000.0 && voiceValue < 6000.0) {
-            dialog_img.setImageResource(R.mipmap.record_animate_10);
-        } else if (voiceValue > 6000.0 && voiceValue < 8000.0) {
-            dialog_img.setImageResource(R.mipmap.record_animate_11);
-        } else if (voiceValue > 8000.0 && voiceValue < 10000.0) {
-            dialog_img.setImageResource(R.mipmap.record_animate_12);
-        } else if (voiceValue > 10000.0 && voiceValue < 12000.0) {
-            dialog_img.setImageResource(R.mipmap.record_animate_13);
-        } else if (voiceValue > 12000.0) {
-            dialog_img.setImageResource(R.mipmap.record_animate_14);
         }
     }
 
