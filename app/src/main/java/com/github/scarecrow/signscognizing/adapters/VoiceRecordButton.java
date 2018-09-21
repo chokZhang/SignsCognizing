@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -24,7 +25,7 @@ import static android.content.ContentValues.TAG;
  * 仿微信可通过手势控制的音频录制按钮
  */
 
-public class VoiceRecordButton extends android.support.v7.widget.AppCompatImageView {
+public class VoiceRecordButton extends AppCompatImageView {
 
     private static final int RECORD_ON = -5,
             RECORD_OFF = -9;
