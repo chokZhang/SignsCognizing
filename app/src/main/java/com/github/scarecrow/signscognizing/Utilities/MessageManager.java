@@ -46,7 +46,7 @@ public class MessageManager {
     private String appKey = "atDLVSr4NFmDNPxPWHxWnPVS";
     private String secretKey = "20da52346b042869be7cda3f8fb12cf5";
     // TtsMode.MIX; 离在线融合，在线优先； TtsMode.ONLINE 纯在线； 没有纯离线
-    private TtsMode ttsMode = TtsMode.ONLINE; //目前SDK存在bug 当设置为MIX模式时会出现错误
+    private TtsMode ttsMode = TtsMode.MIX;
     private OfflineResource offlineResource = null;
 
     private MySynthesizer synthesizer = null;
