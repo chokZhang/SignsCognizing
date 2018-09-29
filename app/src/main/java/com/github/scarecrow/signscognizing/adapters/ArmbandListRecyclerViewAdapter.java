@@ -31,7 +31,7 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
 
     private List<Armband> armband_list;
 
-    private ArmbandSelectFragment.ListItemClickListenner listItemClickListenner;
+    private ArmbandSelectFragment.ListItemClickListener listItemClickListener;
 
     /**
      * 0 一个没选
@@ -53,8 +53,8 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
     }
 
     public void setOnListItemClickListenner(
-            ArmbandSelectFragment.ListItemClickListenner listenner) {
-        listItemClickListenner = listenner;
+            ArmbandSelectFragment.ListItemClickListener listenner) {
+        listItemClickListener = listenner;
     }
 
     @Override
@@ -120,7 +120,7 @@ public class ArmbandListRecyclerViewAdapter extends RecyclerView.Adapter<Armband
                 @Override
                 public void onClick(View view) {
                     Log.d(TAG, "onClick: armband item" + armband);
-                    listItemClickListenner.onListItemClick(armband);
+                    listItemClickListener.onListItemClick(armband);
                 }
             });
         }

@@ -27,10 +27,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name="com.baidu.speech.VoiceRecognitionService"
-            android:exported="false" />
-
 
         <meta-data
             android:name="com.baidu.speech.APP_ID"

@@ -1,5 +1,8 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Created by Scarecrow on 2018/2/6.
  *
@@ -15,12 +18,18 @@ public class SignMessage extends ConversationMessage {
 
     private int capture_id = 0;
 
+    private List<SignSentence> sentences;
+    private SignSentence active_sentence;
+
     private boolean is_capture_complete = false;
 
 
     public SignMessage(String text, int msg_id) {
         super(msg_id, ConversationMessage.SIGN, text);
         sign_feedback_stauts = INITIAL;
+        sentences = new LinkedList<>();
+        active_sentence = new SignSentence();
+        sentences.add(active_sentence);
     }
 
     public int getSignFeedbackStatus() {
@@ -47,4 +56,23 @@ public class SignMessage extends ConversationMessage {
         is_capture_complete = status;
     }
 
+    protected void appendTextContent(String content) {
+        active_sentence.appendWord(content);
+
+    }
+
+    public void cleanTextContent(){
+        sentences.clear();
+        active_sentence = new SignSentence();
+        sentences.add(active_sentence);
+    }
+
+    @Override
+    public String getTextContent() {
+        StringBuilder ret = new StringBuilder();
+        for(SignSentence s:sentences){
+            ret.append(s.getSentenceStr());
+        }
+        return ret.toString();
+    }
 }

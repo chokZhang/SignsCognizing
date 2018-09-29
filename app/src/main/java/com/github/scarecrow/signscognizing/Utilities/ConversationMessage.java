@@ -14,6 +14,9 @@ public abstract class ConversationMessage {
     protected String text_content;
     protected int msg_type;
 
+
+
+
     protected ConversationMessage(int msg_id, int msg_type, String text_content) {
         this.msg_id = msg_id;
         this.msg_type = msg_type;

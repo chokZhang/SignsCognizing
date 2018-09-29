@@ -133,12 +133,13 @@ public class MessageManager {
         SignMessage new_msg;
         if (sign_message_map.containsKey(sign_id)) {
             new_msg = sign_message_map.get(sign_id);
-            synthesizeVoice(text, new_msg.getTextContent());
-            new_msg.setTextContent(text);
+            synthesizeVoice(text);
+            new_msg.appendTextContent(text);
         } else {
-            synthesizeVoice(text, "");
+            synthesizeVoice(text);
+            new_added_msg.cleanTextContent();
             new_added_msg.setCaptureId(capture_id);
-            new_added_msg.setTextContent(text);
+            new_added_msg.appendTextContent(text);
             new_added_msg.setMsgId(sign_id);
             sign_message_map.put(sign_id, new_added_msg);
         }
@@ -200,8 +201,7 @@ public class MessageManager {
 
 
 
-    private void synthesizeVoice(String new_text, String history_text) {
-        String voice_str = new_text.substring(history_text.length());
+    private void synthesizeVoice(String voice_str) {
         synthesizer.speak(voice_str);
     }
 
@@ -238,7 +238,7 @@ public class MessageManager {
             //初始化消息里的数据
             capture_state = true;
             message.setCaptureComplete(false);
-            message.setTextContent("");
+            message.cleanTextContent();
             //向外界告知开始手语识别了
             noticeAllTargetMsgSignCaptureStart();
             SocketConnectionManager.getInstance()
