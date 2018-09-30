@@ -77,7 +77,7 @@ public class ArmbandSelectFragment extends Fragment {
         boolean pair_mode = ArmbandManager.getArmbandsManger().getArmbandPairMode();
 //         单手模式时 点击列表中item即可开始匹配
         if (!pair_mode) {
-            adapter.setOnListItemClickListenner(new ListItemClickListenner() {
+            adapter.setOnListItemClickListenner(new ListItemClickListener() {
                 @Override
                 public void onListItemClick(Armband item) {
                     ArmbandManager.getArmbandsManger()
@@ -172,7 +172,7 @@ public class ArmbandSelectFragment extends Fragment {
                 });
     }
 
-    public interface ListItemClickListenner {
+    public interface ListItemClickListener {
         void onListItemClick(Armband item);
     }
 

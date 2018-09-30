@@ -1,6 +1,5 @@
 package com.github.scarecrow.signscognizing.Utilities;
 
-import com.illucit.instatrie.index.TriePrefixIndex;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.List;
 public class SignSentence {
 
     private List<String> word_seq;
-    private TriePrefixIndex<String> triePrefixIndex;
 
     public SignSentence(){
         word_seq = new LinkedList<>();
