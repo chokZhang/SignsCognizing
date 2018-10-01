@@ -174,7 +174,7 @@ public class SubsequenceSearchTree {
      * @param seqs 待搜索的序列
      * @param root_node 起始节点
      * @param exact 是否模糊搜索
-     * @return
+     * @return 满足seq各个位置key的搜索结果
      */
     private List<List<Pair<String, TreeNode>>>
                 querySequence(List<String> seqs, TreeNode root_node, boolean exact){
@@ -182,6 +182,7 @@ public class SubsequenceSearchTree {
         List<List<Pair<String, TreeNode>>> level_query_result = new LinkedList<>();
         active_nodes.add(root_node);
         for(String k : seqs){
+            List<TreeNode> previous_active_nodes = active_nodes;
             active_nodes = find(k, active_nodes, true);
             List<Pair<String, TreeNode>> level_nodes = getAllAccessibleValue(active_nodes);
             level_query_result.add(level_nodes);
@@ -189,7 +190,7 @@ public class SubsequenceSearchTree {
             // 如果seq中第一个key不match，此时active node 为空
             // 因此将root重新加入active node，检测第二个key是否能从根结点开始有匹配。
             if(active_nodes.size() == 0 && !exact)
-                active_nodes.add(root_node);
+                active_nodes.addAll(previous_active_nodes);
         }
         Collections.reverse(level_query_result);
         // revers it, the exact satisfy node is the first one.

@@ -1,5 +1,6 @@
 package com.github.scarecrow.signscognizing;
 
+import com.github.scarecrow.signscognizing.Utilities.auto_complete.SentenceAutoCompleter;
 import com.github.scarecrow.signscognizing.Utilities.auto_complete.SubsequenceSearchTree;
 import com.github.scarecrow.signscognizing.Utilities.auto_complete.TreeNode;
 
@@ -38,9 +39,22 @@ public class ExampleUnitTest {
         List<TreeNode> nodes = tree.findMultipleNodes("ccc");
 //        System.out.println( String.valueOf(tree.getAllAccessibleValue(nodes)));
 
-        List<String> seq = Arrays.asList("kkk", "ddd");
+        List<String> seq = Arrays.asList("aaa", "kkk", "ddd");
         System.out.println( String.valueOf(tree.querySequenceValue(seq, true)));
         System.out.println( String.valueOf(tree.querySequence(seq, false)));
+    }
+
+
+    @Test
+    public void testAutoCompleter() {
+        List<String> query1 = Arrays.asList("请问");
+        List<String> query2 = Arrays.asList("请问", "航班");
+        List<String> query3 = Arrays.asList("请问", "在哪里");
+        List<String> query4 = Arrays.asList("在哪里");
+        System.out.println(SentenceAutoCompleter.getInstance().executeValueQuery(query1, true));
+        System.out.println(SentenceAutoCompleter.getInstance().executeValueQuery(query2, false));
+        System.out.println(SentenceAutoCompleter.getInstance().executeValueQuery(query3, true));
+        System.out.println(SentenceAutoCompleter.getInstance().executeValueQuery(query4, true));
     }
 
 }

@@ -38,5 +38,7 @@ dependencies {
 
     implementation 'com.otaliastudios:autocomplete:1.1.0'
 
+    testImplementation 'org.json:json:20140107'
+
     api 'com.google.guava:guava:26.0-android'
 }
