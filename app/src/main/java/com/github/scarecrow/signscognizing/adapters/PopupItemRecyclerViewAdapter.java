@@ -18,12 +18,33 @@ public class PopupItemRecyclerViewAdapter extends RecyclerView.Adapter <PopupIte
 
     List<String> items;
 
+
+    private OnItemClickListener mListener = null;
+
     public PopupItemRecyclerViewAdapter(){
         items = new ArrayList<>();
     }
 
+    /*public static PopupItemRecyclerViewAdapter getPopupItemRecyclerViewAdapter(){
+        if(instance == null){
+            instance = new PopupItemRecyclerViewAdapter();
+        }
+        return instance;
+    }*/
+
     public void setItemList(List<String> itemList){
-        items = itemList;
+
+        this.items.clear();
+        this.items.addAll(itemList);
+        notifyDataSetChanged();
+    }
+
+    public void clearItems(){
+        items.clear();
+    }
+
+    public void setItemClickListener(OnItemClickListener listener){
+        mListener = listener;
     }
 
     @NonNull
@@ -41,7 +62,8 @@ public class PopupItemRecyclerViewAdapter extends RecyclerView.Adapter <PopupIte
         holder.content.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if(mListener != null)
+                    mListener.onItemticClick(view, nowContent);
             }
         });
     }
@@ -60,5 +82,10 @@ public class PopupItemRecyclerViewAdapter extends RecyclerView.Adapter <PopupIte
             item_body = (LinearLayout) item_view;
             content = item_view.findViewById(R.id.popup_item_content);
         }
+    }
+
+    public static interface OnItemClickListener{
+        void onItemticClick(View view, String content);
+        //void onItemLongClick(View view);
     }
 }

@@ -14,7 +14,9 @@ import com.otaliastudios.autocomplete.AutocompletePolicy;
 public class SimplePolicy implements AutocompletePolicy {
 
     //popup_show_status标识是否显示popup
-    public static  boolean popup_show_status = false;
+    private boolean popup_show_status = false;
+
+    private String content = "";
 
     private static final String TAG = "SimplePolicy";
 
@@ -29,7 +31,11 @@ public class SimplePolicy implements AutocompletePolicy {
      * @return true if popup should be shown
      */
     public boolean shouldShowPopup(Spannable text, int cursorPos) {
-        Log.i(TAG, "shouldShowPopup: popup_show_status is " + popup_show_status);
+        content = text.toString();
+        if(content.charAt(content.length() - 1) != '。')
+            popup_show_status = true;
+        else popup_show_status = false;
+        //Log.i(TAG, "shouldShowPopup: popup_show_status is " + popup_show_status);
         return popup_show_status;
     }
 
@@ -45,6 +51,7 @@ public class SimplePolicy implements AutocompletePolicy {
      * @return true if popup should be hidden
      */
     public boolean shouldDismissPopup(Spannable text, int cursorPos) {
+
         return !popup_show_status;
     }
 
@@ -64,8 +71,11 @@ public class SimplePolicy implements AutocompletePolicy {
      * @return the query for presenter
      */
     public CharSequence getQuery(Spannable text) {
-        Log.i(TAG, "getQuery: the text is " + text);
-        return text;
+        content = text.toString();
+        int index = content.lastIndexOf("。");
+        CharSequence queryContent = content.substring(index + 1, content.length());
+        Log.i(TAG, "getQuery: the text is " + queryContent);
+        return queryContent;
     }
 
     /**

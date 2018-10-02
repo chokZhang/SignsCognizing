@@ -6,17 +6,24 @@ import android.graphics.Color;
 
 import com.github.scarecrow.signscognizing.Utilities.ArmbandManager;
 import com.github.scarecrow.signscognizing.Utilities.SocketConnectionManager;
+import com.github.scarecrow.signscognizing.Utilities.auto_complete.SimpleAutocompleteCallback;
+import com.github.scarecrow.signscognizing.Utilities.auto_complete.SimplePolicy;
+import com.github.scarecrow.signscognizing.Utilities.auto_complete.SimpleRecyclerViewPresenter;
 import com.github.scarecrow.signscognizing.fragments.InputControlPanelFragment;
 import com.iflytek.cloud.SpeechRecognizer;
 
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +34,8 @@ import com.github.scarecrow.signscognizing.Utilities.MessageManager;
 import com.github.scarecrow.signscognizing.Utilities.SignMessage;
 import com.github.scarecrow.signscognizing.Utilities.TextMessage;
 import com.github.scarecrow.signscognizing.Utilities.VoiceMessage;
+import com.otaliastudios.autocomplete.Autocomplete;
+import com.otaliastudios.autocomplete.AutocompleteCallback;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -54,7 +63,7 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
 
     private List<ConversationMessage> messages_list;
 
-    private Context context;
+    private static Context context;
 
     public ConversationMessagesRVAdapter(Context context) {
         this.context = context;
@@ -69,10 +78,11 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
         public LinearLayout receive_msg_view, send_msg_view,
                 sign_confirm_dialog, sign_recapture_dialog;
 
-        public TextView receive_msg_content, send_msg_content,
+        public TextView  send_msg_content,
                 sign_confirm_yes_button, sign_confirm_no_button,
                 sign_recapture_yes_button, sign_recapture_no_button,
                 msg_type_display;
+        public EditText msg_content_receive;
 
 
         public MessagesItemViewHolder(View view) {
@@ -82,7 +92,10 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
             sign_confirm_dialog = view.findViewById(R.id.sign_confirm_dialog);
             sign_recapture_dialog = view.findViewById(R.id.sign_recapture_dialog);
 
-            receive_msg_content = view.findViewById(R.id.msg_content_receive);
+            msg_content_receive = view.findViewById(R.id.msg_content_receive);
+
+            setAutocomplete(msg_content_receive, context);
+
             send_msg_content = view.findViewById(R.id.msg_content_send);
 
             sign_confirm_yes_button = view.findViewById(R.id.button_sign_confirm_yes);
@@ -93,6 +106,19 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
 
             msg_type_display = view.findViewById(R.id.text_view_msg_type_display);
 
+        }
+
+        private void setAutocomplete(EditText textView, Context context){
+            AutocompleteCallback temp = new SimpleAutocompleteCallback();
+            Drawable backgroundDrawable = new ColorDrawable(Color.WHITE);
+            float elevation = 6f;
+            Autocomplete.on(textView)
+                    .with(new SimplePolicy())
+                    .with(temp)
+                    .with(elevation)
+                    .with(backgroundDrawable)
+                    .with(new SimpleRecyclerViewPresenter(context))
+                    .build();
         }
 
     }
@@ -166,7 +192,7 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
         switch (message.getSignFeedbackStatus()) {
             case SignMessage.INITIAL:
                 holder.receive_msg_view.setVisibility(View.VISIBLE);
-                holder.receive_msg_content.setText(message.getTextContent());
+                holder.msg_content_receive.setText(message.getTextContent());
                 if (message.isCaptureComplete()) {
                     holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
                     holder.sign_confirm_yes_button.setOnClickListener(new View.OnClickListener() {
@@ -192,13 +218,13 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
             case SignMessage.CONFIRMED_CORRECT:
                 holder.receive_msg_view.setVisibility(View.VISIBLE);
                 holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
-                holder.receive_msg_content.setText(message.getTextContent());
+                holder.msg_content_receive.setText(message.getTextContent());
                 holder.sign_confirm_yes_button.setTextColor(Color.GRAY);
                 break;
             case SignMessage.CONFIRMED_WRONG:
                 holder.receive_msg_view.setVisibility(View.VISIBLE);
                 holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
-                holder.receive_msg_content.setText(message.getTextContent());
+                holder.msg_content_receive.setText(message.getTextContent());
                 holder.sign_confirm_no_button.setTextColor(Color.GRAY);
 
                 holder.sign_recapture_dialog.setVisibility(View.VISIBLE);
@@ -229,7 +255,7 @@ public class ConversationMessagesRVAdapter extends RecyclerView.Adapter<Conversa
             case SignMessage.NO_RECAPTURE:
                 holder.receive_msg_view.setVisibility(View.VISIBLE);
                 holder.sign_confirm_dialog.setVisibility(View.VISIBLE);
-                holder.receive_msg_content.setText(message.getTextContent());
+                holder.msg_content_receive.setText(message.getTextContent());
                 holder.sign_confirm_no_button.setTextColor(Color.GRAY);
 
                 holder.sign_recapture_dialog.setVisibility(View.VISIBLE);

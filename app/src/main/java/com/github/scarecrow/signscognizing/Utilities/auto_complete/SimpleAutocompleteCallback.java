@@ -13,6 +13,10 @@ public class SimpleAutocompleteCallback implements AutocompleteCallback <String>
 
     private static final String TAG = "AutocompleteCallback";
 
+    public SimpleAutocompleteCallback(){
+
+    }
+
     /**
      * Called when an item inside your list is clicked.
      * This works if your presenter has dispatched a click event.
@@ -24,13 +28,12 @@ public class SimpleAutocompleteCallback implements AutocompleteCallback <String>
      */
     public boolean onPopupItemClicked(Editable editable, String item) {
         String content = editable.toString();
+        item = item + "。";
         int index = content.lastIndexOf("。");
         int length = content.length();
 
         String before = content.substring(index + 1, length);
         editable.replace(index + 1, length, item);
-        //选中后popup不显示
-        SimplePolicy.popup_show_status = false;
 
         Log.i(TAG, "onPopupItemClicked: change " + before + " to " + item);
         return true;
